@@ -6,6 +6,8 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
@@ -183,7 +185,7 @@
 </nav>
 
         <div class="mt-auto pt-6 border-t border-surface-container-high space-y-2">
-            <a href="#" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer">
+            <a onclick="showSettingsMessage()" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer">
                 <span class="material-symbols-outlined">settings</span>
                 <span class="">Configuración</span>
             </a>
@@ -340,6 +342,17 @@
     // Variables globales para Chart.js
     let charts = {};
     let globalRawData = [];
+
+    function showSettingsMessage() {
+        Swal.fire({
+            title: '¡Próximamente!',
+            text: 'El módulo de configuración está en etapa de desarrollo y será añadido pronto.',
+            icon: 'info',
+            background: '#1e293b',
+            color: '#f8fafc',
+            confirmButtonColor: '#3b82f6'
+        });
+    }
 
     // Lógica para cambiar de pestañas sin recargar
     function switchTab(tabId, element) {

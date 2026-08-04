@@ -23,15 +23,18 @@ if SUPABASE_URL and SUPABASE_KEY:
 else:
     supabase = None
 
-cached_json = None
-last_cache_time = 0
-is_fetching = False
-data_lock = threading.Lock()
+cached_jsons = {}
+last_cache_times = {}
+data_locks = {}
 
-def process_excel_data():
-    url = os.environ.get('EXCEL_URL')
+def get_lock(pid: str):
+    if pid not in data_locks:
+        data_locks[pid] = threading.Lock()
+    return data_locks[pid]
+
+def process_excel_data(url: str):
     if not url:
-        raise ValueError("La variable de entorno EXCEL_URL no está configurada en Render.")
+        raise ValueError("URL de Excel no proporcionada.")
     
     # Descargar el archivo a la memoria UNA SOLA VEZ para acelerar al doble
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -120,19 +123,14 @@ def process_excel_data():
         
     return json.dumps({"data": cleaned_records, "error": None}, default=str)
 
-def fetch_data_background():
-    global cached_json, last_cache_time, is_fetching
-    if is_fetching: return
-    is_fetching = True
+def fetch_data_background(planilla_id: str, url: str):
     try:
-        with data_lock:
-            json_content = process_excel_data()
-            cached_json = json_content
-            last_cache_time = time.time()
+        with get_lock(planilla_id):
+            json_content = process_excel_data(url)
+            cached_jsons[planilla_id] = json_content
+            last_cache_times[planilla_id] = time.time()
     except Exception as e:
-        print("Error en pre-carga de login:", e)
-    finally:
-        is_fetching = False
+        print(f"Error en carga en background para {planilla_id}:", e)
 
 def verify_session(request: Request):
     if not supabase:
@@ -147,8 +145,7 @@ def verify_session(request: Request):
         return None
 
 @app.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request, background_tasks: BackgroundTasks):
-    background_tasks.add_task(fetch_data_background)
+async def login_page(request: Request):
     return templates.TemplateResponse(request=request, name="login.html")
 
 @app.post("/login")
@@ -185,35 +182,70 @@ async def get_dashboard(request: Request):
 
 # Cambiamos async def por def normal para que FastAPI lo ejecute en un Threadpool
 # y no bloquee el hilo principal mientras Pandas procesa.
-@app.get("/api/data")
-def get_data(request: Request, background_tasks: BackgroundTasks):
-    global cached_json, last_cache_time
+@app.get("/api/planillas")
+def get_planillas(request: Request):
+    if not verify_session(request):
+        return Response(content=json.dumps({"error": "No autorizado"}), status_code=401)
     
+    if supabase:
+        try:
+            res = supabase.table("planillas_excel").select("*").order("creado_en", desc=True).execute()
+            if res.data:
+                return JSONResponse(content={"data": res.data})
+        except Exception:
+            pass # Si falla (por ej. tabla no existe), caemos al fallback
+            
+    # Fallback al link original del .env
+    url = os.environ.get("EXCEL_URL")
+    if url:
+        return JSONResponse(content={"data": [{"id": "default", "nombre": "Planilla Actual (Por Defecto)", "url": url}]})
+    return JSONResponse(content={"data": []})
+
+@app.post("/api/planillas")
+async def add_planilla(request: Request):
+    if not verify_session(request):
+        return Response(content=json.dumps({"error": "No autorizado"}), status_code=401)
+        
+    data = await request.json()
+    nombre = data.get("nombre")
+    url = data.get("url")
+    
+    if not nombre or not url:
+        return Response(content=json.dumps({"error": "Faltan datos"}), status_code=400)
+        
+    if supabase:
+        try:
+            res = supabase.table("planillas_excel").insert({"nombre": nombre, "url": url}).execute()
+            return JSONResponse(content={"success": True, "data": res.data[0] if res.data else None})
+        except Exception as e:
+            return Response(content=json.dumps({"error": str(e)}), status_code=500)
+    return Response(content=json.dumps({"error": "Base de datos no configurada"}), status_code=500)
+
+@app.get("/api/data")
+def get_data(request: Request, background_tasks: BackgroundTasks, planilla_id: str = "default", url: str = None):
     if supabase:
         user = verify_session(request)
         if not user:
             return Response(content=json.dumps({"error": "No autorizado"}), status_code=401)
 
+    # Si no nos envían URL, usamos la del env por defecto
+    if not url:
+        url = os.environ.get("EXCEL_URL")
+
     current_time = time.time()
     
-    # ESTRATEGIA STALE-WHILE-REVALIDATE: 
-    # Si hay caché, lo devolvemos INSTANTÁNEAMENTE (0 segundos de espera).
-    # Si el caché tiene más de 5 minutos, lanzamos una tarea invisible para actualizarlo
-    # en segundo plano, así la próxima vez tendrá los datos frescos sin hacer esperar a nadie.
-    if cached_json:
-        if (current_time - last_cache_time) > 300: # 5 minutos (300s)
-            background_tasks.add_task(fetch_data_background)
-        return Response(content=cached_json, media_type="application/json")
+    if planilla_id in cached_jsons:
+        if (current_time - last_cache_times.get(planilla_id, 0)) > 300:
+            background_tasks.add_task(fetch_data_background, planilla_id, url)
+        return Response(content=cached_jsons[planilla_id], media_type="application/json")
         
-    # Si no hay caché absoluto (primer inicio del servidor), debemos procesarlo
     try:
-        # Bloqueamos para asegurar que solo un proceso a la vez lea el Excel
-        with data_lock:
-            if cached_json and (time.time() - last_cache_time) < 300:
-                return Response(content=cached_json, media_type="application/json")
-            json_content = process_excel_data()
-            cached_json = json_content
-            last_cache_time = time.time()
+        with get_lock(planilla_id):
+            if planilla_id in cached_jsons and (time.time() - last_cache_times.get(planilla_id, 0)) < 300:
+                return Response(content=cached_jsons[planilla_id], media_type="application/json")
+            json_content = process_excel_data(url)
+            cached_jsons[planilla_id] = json_content
+            last_cache_times[planilla_id] = time.time()
         return Response(content=json_content, media_type="application/json")
     except Exception as e:
         json_content = json.dumps({"data": [], "error": str(e)}, default=str)

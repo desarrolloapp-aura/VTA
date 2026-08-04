@@ -205,14 +205,21 @@
 <p class="font-body-sm text-body-sm text-on-surface-variant">Visualización de datos en tiempo real desde Google Drive</p>
 </div>
 <div class="flex items-center gap-6">
-<!-- Selector de meses -->
-<div class="relative hidden md:block">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">calendar_month</span>
-<select id="monthSelector" class="bg-[#1E293B] border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] w-[250px] transition-all appearance-none cursor-pointer">
-    <option value="all" style="color:#000;">Todos los meses</option>
-</select>
-</div>
-</div>
+                <!-- Selector de Planillas -->
+                <div class="relative hidden xl:block">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">table_chart</span>
+                    <select id="planillaSelector" class="bg-[#1E293B] border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] w-[250px] transition-all appearance-none cursor-pointer" onchange="changePlanilla()">
+                        <option value="default" style="color:#000;">Cargando planillas...</option>
+                    </select>
+                </div>
+                <!-- Selector de meses -->
+                <div class="relative hidden md:block">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">calendar_month</span>
+                    <select id="monthSelector" class="bg-[#1E293B] border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] w-[200px] transition-all appearance-none cursor-pointer">
+                        <option value="all" style="color:#000;">Todos los meses</option>
+                    </select>
+                </div>
+            </div>
 </header>
 
 <!-- Dashboard Canvas -->
@@ -343,15 +350,100 @@
     let charts = {};
     let globalRawData = [];
 
-    function showSettingsMessage() {
-        Swal.fire({
-            title: '¡Próximamente!',
-            text: 'El módulo de configuración está en etapa de desarrollo y será añadido pronto.',
-            icon: 'info',
+    let planillasList = [];
+
+    async function loadPlanillas() {
+        try {
+            const res = await fetch('/api/planillas');
+            const json = await res.json();
+            planillasList = json.data || [];
+            const selector = document.getElementById('planillaSelector');
+            selector.innerHTML = '';
+            planillasList.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.nombre;
+                opt.dataset.url = p.url;
+                opt.style.color = '#000';
+                selector.appendChild(opt);
+            });
+        } catch(e) {
+            console.error("Error loading planillas", e);
+        }
+    }
+
+    async function changePlanilla() {
+        const selector = document.getElementById('planillaSelector');
+        const selectedOption = selector.options[selector.selectedIndex];
+        if (!selectedOption) return;
+        
+        const pid = selectedOption.value;
+        const url = selectedOption.dataset.url;
+        
+        const overlay = document.getElementById('loading-overlay');
+        overlay.style.display = 'flex';
+        setTimeout(() => overlay.style.opacity = '1', 10);
+        
+        try {
+            const response = await fetch(`/api/data?planilla_id=${encodeURIComponent(pid)}&url=${encodeURIComponent(url)}`);
+            const result = await response.json();
+            
+            if (result.error) throw new Error(result.error);
+            
+            globalRawData = result.data;
+            document.getElementById('monthSelector').innerHTML = '<option value="all" style="color:#000;">Todos los meses</option>';
+            initMonthSelector();
+            initCustomSelectors();
+        } catch(e) {
+            console.error(e);
+            Swal.fire('Error', 'No se pudo cargar esta planilla: ' + e.message, 'error');
+        } finally {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 500);
+        }
+    }
+
+    async function showSettingsMessage() {
+        const { value: formValues } = await Swal.fire({
+            title: 'Agregar Planilla (Mes/Año)',
+            html:
+                '<p style="font-size:14px; margin-bottom:15px; color:#bacac5;">Aquí puedes guardar un nuevo link de Excel. Estará disponible para siempre en el selector de arriba.</p>' +
+                '<input id="swal-nombre" class="swal2-input" placeholder="Nombre (ej: Febrero 2024)">' +
+                '<input id="swal-url" class="swal2-input" placeholder="URL compartida del archivo (ej: Sharepoint)">',
+            focusConfirm: false,
             background: '#1e293b',
             color: '#f8fafc',
-            confirmButtonColor: '#3b82f6'
+            showCancelButton: true,
+            confirmButtonText: 'Guardar Planilla',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#2DD4BF',
+            preConfirm: () => {
+                return {
+                    nombre: document.getElementById('swal-nombre').value,
+                    url: document.getElementById('swal-url').value
+                }
+            }
         });
+
+        if (formValues && formValues.nombre && formValues.url) {
+            Swal.fire({title: 'Guardando...', background: '#1e293b', color: '#f8fafc', didOpen: () => {Swal.showLoading()}});
+            try {
+                const res = await fetch('/api/planillas', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(formValues)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire({title: '¡Éxito!', text: 'Planilla agregada.', icon: 'success', background: '#1e293b', color: '#f8fafc'});
+                    await loadPlanillas();
+                } else {
+                    Swal.fire({title: 'Error', text: data.error || 'No se pudo guardar', icon: 'error', background: '#1e293b', color: '#f8fafc'});
+                }
+            } catch(e) {
+                Swal.fire({title: 'Error', text: 'Fallo de red', icon: 'error', background: '#1e293b', color: '#f8fafc'});
+            }
+        }
     }
 
     // Lógica para cambiar de pestañas sin recargar
@@ -736,6 +828,14 @@
             }
             
             // Inicializa selectores y gráficos
+            await loadPlanillas();
+            
+            // Re-fijar la URL y el ID original en base a lo que se descargó al principio
+            if (planillasList.length > 0) {
+                const selector = document.getElementById('planillaSelector');
+                selector.value = planillasList[0].id;
+            }
+            
             initMonthSelector();
             initCustomSelectors();
             

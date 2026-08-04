@@ -1,21 +1,78 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Form, Depends, Cookie
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response, RedirectResponse
 import pandas as pd
 import json
 import os
+from supabase import create_client, Client
 
 app = FastAPI(title="Dashboard VTA")
 
 templates = Jinja2Templates(directory="templates")
 
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+else:
+    supabase = None
+
+def verify_session(request: Request):
+    if not supabase:
+        return None
+    token = request.cookies.get("access_token")
+    if not token:
+        return None
+    try:
+        user = supabase.auth.get_user(token)
+        return user
+    except:
+        return None
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse(request=request, name="login.html")
+
+@app.post("/login")
+async def login_post(request: Request, email: str = Form(...), password: str = Form(...)):
+    if not supabase:
+        return templates.TemplateResponse(request=request, name="login.html", context={"error": "Supabase no está configurado en el servidor"})
+        
+    try:
+        response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+        token = response.session.access_token
+        
+        redirect = RedirectResponse(url="/", status_code=303)
+        redirect.set_cookie(key="access_token", value=token, httponly=True, max_age=3600*24)
+        return redirect
+    except Exception as e:
+        return templates.TemplateResponse(request=request, name="login.html", context={"error": "Credenciales inválidas"})
+
+@app.get("/logout")
+async def logout():
+    redirect = RedirectResponse(url="/login", status_code=303)
+    redirect.delete_cookie("access_token")
+    return redirect
+
 @app.get("/", response_class=HTMLResponse)
 async def get_dashboard(request: Request):
-    # Retorna el HTML inmediatamente sin cargar datos
+    if not supabase:
+        return HTMLResponse("Falta configurar SUPABASE_URL y SUPABASE_KEY en Render")
+        
+    user = verify_session(request)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+        
     return templates.TemplateResponse(request=request, name="dashboard.html")
 
 @app.get("/api/data")
-async def get_data():
+async def get_data(request: Request):
+    if supabase:
+        user = verify_session(request)
+        if not user:
+            return Response(content=json.dumps({"error": "No autorizado"}), status_code=401)
+
     # Obtener URL estrictamente desde variable de entorno (por seguridad)
     url = os.environ.get('EXCEL_URL')
     if not url:

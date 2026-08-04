@@ -3,3 +3,5 @@ uvicorn
 jinja2
 pandas
 openpyxl
+supabase
+python-multipart

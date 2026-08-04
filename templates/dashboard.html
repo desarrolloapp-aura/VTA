@@ -606,12 +606,36 @@
         columns.unshift('T°');
         columns.unshift('Dia');
         
+        const categoricalCols = [];
+        const numericalCols = [];
+
+        columns.forEach(col => {
+            let isNum = false;
+            for(let i = 0; i < Math.min(globalRawData.length, 30); i++) {
+                let val = globalRawData[i][col];
+                if (val !== null && val !== 'NaN' && val !== undefined && val !== '') {
+                    if (typeof val === 'number') { isNum = true; break; }
+                    if (typeof val === 'string') {
+                        // Check if it's a time like HH:MM:SS
+                        if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(val)) { isNum = true; break; }
+                        // Check if it's a float, ignoring dates like "29-Jul"
+                        if (!isNaN(parseFloat(val)) && isFinite(val) && !/^[0-9]{2}-[a-zA-Z]{3}$/.test(val)) { isNum = true; break; }
+                    }
+                }
+            }
+            if (isNum) numericalCols.push(col);
+            else categoricalCols.push(col);
+        });
+        
         const selX = document.getElementById('customX');
         const selY = document.getElementById('customY');
         
-        columns.forEach(col => {
+        categoricalCols.forEach(col => {
             const optX = document.createElement('option');
             optX.value = col; optX.textContent = col; selX.appendChild(optX);
+        });
+
+        numericalCols.forEach(col => {
             const optY = document.createElement('option');
             optY.value = col; optY.textContent = col; selY.appendChild(optY);
         });

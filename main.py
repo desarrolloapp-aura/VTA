@@ -49,4 +49,4 @@ async def get_dashboard(request: Request):
             'error': str(e)
         }
         
-    return templates.TemplateResponse("dashboard.html", context)
+    return templates.TemplateResponse(request=request, name="dashboard.html", context=context)

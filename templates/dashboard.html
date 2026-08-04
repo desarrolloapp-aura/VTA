@@ -168,7 +168,7 @@
 
 <a id="nav-grupos" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" onclick="switchTab('grupos', this)">
 <span class="material-symbols-outlined">groups</span>
-<span class="">Producción (G1 vs G2)</span>
+<span class="">Producción (Grupos)</span>
 </a>
 
 <a id="nav-kpis" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" onclick="switchTab('kpis', this)">
@@ -277,7 +277,7 @@
     <div id="grupos" class="view-section hidden">
         <div class="glass-card rounded-xl p-6 flex flex-col min-h-[500px]">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Histórico de Producción: Grupo 1 vs Grupo 2</h3>
+                <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Histórico de Producción por Grupos</h3>
             </div>
             <div class="flex-1 w-full relative">
                 <canvas id="chart5"></canvas>
@@ -367,7 +367,7 @@
         const titles = {
             'resumen': 'Resumen General',
             'equipos': 'Ventas (3500 vs 3700)',
-            'grupos': 'Producción (G1 vs G2)',
+            'grupos': 'Producción por Grupos',
             'kpis': 'Cumplimiento (%)',
             'custom': 'Crea tu Gráfico'
         };
@@ -468,10 +468,25 @@
         const vent3500 = recentData.map(d => parseFloat(d['Vent. 3500']) || 0);
         const vent3700 = recentData.map(d => parseFloat(d['Vent. 3700']) || 0);
 
-        const g1Mensual = dailyData.map(d => parseFloat(d['G1']) || 0);
-        const g2Mensual = dailyData.map(d => parseFloat(d['G2']) || 0);
-
         const cumplMensual = dailyData.map(d => (parseFloat(d['% cumplimeinto']) || 0) * 100);
+
+        // Buscar dinámicamente columnas de Grupos (G1, G2, G3...)
+        const groupColumns = Object.keys(globalRawData[0] || {}).filter(k => /^G\d+$/.test(k));
+        const groupDatasets = [];
+        const groupColors = ['#57f1db', '#ffafd3', '#7bd0ff', '#ffb4ab', '#2dd4bf', '#5ec9ff']; 
+        
+        groupColumns.forEach((col, index) => {
+            const dataArr = dailyData.map(d => parseFloat(d[col]) || 0);
+            const colorHex = groupColors[index % groupColors.length];
+            groupDatasets.push({
+                label: `Grupo ${col.replace('G', '')} (${col})`,
+                data: dataArr,
+                borderColor: colorHex,
+                backgroundColor: colorHex + '33', // 20% opacity
+                fill: true,
+                tension: 0.3
+            });
+        });
 
         Chart.defaults.font.family = "'Hanken Grotesk', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
         Chart.defaults.color = '#bacac5'; // on-surface-variant
@@ -563,10 +578,7 @@
             type: 'line',
             data: {
                 labels: labelsMensual,
-                datasets: [
-                    { label: 'Grupo 1 (G1)', data: g1Mensual, borderColor: '#57f1db', backgroundColor: 'rgba(87, 241, 219, 0.2)', fill: true, tension: 0.3 },
-                    { label: 'Grupo 2 (G2)', data: g2Mensual, borderColor: '#ffafd3', backgroundColor: 'rgba(255, 175, 211, 0.2)', fill: true, tension: 0.3 }
-                ]
+                datasets: groupDatasets
             },
             options: {
                 responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },

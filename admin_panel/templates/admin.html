@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - VTA</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Hanken Grotesk', sans-serif; background-color: #0F172A; color: #dde4e1; }
+        .glass-card { background: #1E293B; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .nav-active { border-left: 3px solid #2DD4BF; background: rgba(45, 212, 191, 0.1); color: #2DD4BF; }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-[260px] h-screen bg-[#1E293B] border-r border-slate-800 flex flex-col py-6">
+        <div class="px-6 mb-8">
+            <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-[#2DD4BF]">shield_person</span>
+                Admin Panel
+            </h1>
+            <p class="text-slate-400 text-sm mt-1">Gestión de Accesos</p>
+        </div>
+
+        <nav class="flex-1 space-y-2 px-3">
+            <a onclick="switchTab('listado', this)" class="nav-item nav-active flex items-center gap-3 px-3 py-3 rounded-r-lg text-sm font-semibold cursor-pointer transition-all hover:bg-slate-800">
+                <span class="material-symbols-outlined">group</span>
+                Directorio de Usuarios
+            </a>
+            <a onclick="switchTab('registro', this)" class="nav-item flex items-center gap-3 px-3 py-3 rounded-r-lg text-sm font-semibold cursor-pointer text-slate-400 transition-all hover:bg-slate-800">
+                <span class="material-symbols-outlined">person_add</span>
+                Registrar Usuario
+            </a>
+        </nav>
+
+        <div class="px-6 mt-auto">
+            <a href="/logout" class="flex items-center gap-3 text-red-400 hover:text-red-300 transition-colors text-sm font-semibold">
+                <span class="material-symbols-outlined">logout</span>
+                Cerrar Sesión
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 h-screen overflow-y-auto bg-[#0F172A] p-8">
+        
+        <!-- Vista: Listado -->
+        <div id="view-listado" class="max-w-4xl mx-auto block">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-white">Directorio de Usuarios</h2>
+                    <p class="text-slate-400 mt-1">Visualiza y administra las cuentas registradas en Supabase.</p>
+                </div>
+                <button onclick="loadUsers()" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition-colors" title="Actualizar lista">
+                    <span class="material-symbols-outlined">refresh</span>
+                </button>
+            </header>
+
+            <div class="glass-card rounded-xl overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800/50 text-slate-300 text-sm border-b border-slate-700">
+                            <th class="px-6 py-4 font-semibold">Correo Electrónico</th>
+                            <th class="px-6 py-4 font-semibold">Fecha de Creación</th>
+                            <th class="px-6 py-4 font-semibold text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body" class="divide-y divide-slate-700/50">
+                        <tr><td colspan="3" class="px-6 py-8 text-center text-slate-400">Cargando usuarios...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Vista: Registro -->
+        <div id="view-registro" class="max-w-md mx-auto hidden">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-white">Nuevo Usuario</h2>
+                <p class="text-slate-400 mt-1">Crea una cuenta con acceso al Dashboard.</p>
+            </header>
+
+            <div class="glass-card rounded-xl p-8">
+                <form id="form-registro" onsubmit="createUser(event)" class="space-y-6">
+                    <div>
+                        <label class="block text-slate-400 text-sm font-semibold mb-2">Correo Electrónico</label>
+                        <input type="email" id="reg-email" required class="w-full bg-[#0F172A] border border-slate-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF]">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 text-sm font-semibold mb-2">Contraseña (Mínimo 6)</label>
+                        <input type="password" id="reg-pwd" required minlength="6" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF]">
+                    </div>
+                    <button type="submit" id="btn-submit" class="w-full bg-[#2DD4BF] hover:bg-[#57f1db] text-[#003731] font-bold py-3 px-4 rounded-lg transition-colors">
+                        Crear Cuenta
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function switchTab(tab, el) {
+            document.querySelectorAll('.nav-item').forEach(n => {
+                n.classList.remove('nav-active', 'text-[#2DD4BF]');
+                n.classList.add('text-slate-400');
+            });
+            el.classList.add('nav-active', 'text-[#2DD4BF]');
+            el.classList.remove('text-slate-400');
+
+            document.getElementById('view-listado').classList.add('hidden');
+            document.getElementById('view-registro').classList.add('hidden');
+            document.getElementById('view-' + tab).classList.remove('hidden');
+
+            if (tab === 'listado') loadUsers();
+        }
+
+        async function loadUsers() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-8 text-center text-slate-400"><div class="animate-spin w-6 h-6 border-2 border-[#2DD4BF] border-t-transparent rounded-full mx-auto"></div></td></tr>';
+            
+            try {
+                const res = await fetch('/api/users');
+                const data = await res.json();
+                
+                if (data.error) throw new Error(data.error);
+                
+                tbody.innerHTML = '';
+                if (data.users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-8 text-center text-slate-400">No hay usuarios registrados.</td></tr>';
+                    return;
+                }
+
+                data.users.forEach(u => {
+                    const date = new Date(u.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-800/30 transition-colors";
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 text-white font-medium">${u.email}</td>
+                        <td class="px-6 py-4 text-slate-400 text-sm">${date}</td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="deleteUser('${u.id}', '${u.email}')" class="text-red-400 hover:text-red-300 hover:bg-red-400/10 p-2 rounded-lg transition-colors flex items-center justify-center ml-auto" title="Eliminar Usuario">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-8 text-center text-red-400">Error al cargar usuarios: ${e.message}</td></tr>`;
+            }
+        }
+
+        async function createUser(e) {
+            e.preventDefault();
+            const email = document.getElementById('reg-email').value;
+            const pwd = document.getElementById('reg-pwd').value;
+            const btn = document.getElementById('btn-submit');
+            
+            btn.disabled = true;
+            btn.innerHTML = 'Creando...';
+
+            try {
+                const res = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({email, password: pwd})
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    Swal.fire({ title: 'Éxito', text: `Usuario ${data.user} creado.`, icon: 'success', background: '#1e293b', color: '#f8fafc' });
+                    document.getElementById('form-registro').reset();
+                } else {
+                    Swal.fire({ title: 'Error', text: data.error, icon: 'error', background: '#1e293b', color: '#f8fafc' });
+                }
+            } catch (err) {
+                Swal.fire({ title: 'Error', text: 'Fallo de red', icon: 'error', background: '#1e293b', color: '#f8fafc' });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Crear Cuenta';
+            }
+        }
+
+        async function deleteUser(uid, email) {
+            const confirm = await Swal.fire({
+                title: '¿Estás seguro?',
+                html: `Vas a eliminar permanentemente a <b class="text-white">${email}</b>.<br>Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#334155',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                background: '#1e293b', color: '#f8fafc'
+            });
+
+            if (confirm.isConfirmed) {
+                try {
+                    const res = await fetch(`/api/users/${uid}`, { method: 'DELETE' });
+                    const data = await res.json();
+                    if (data.success) {
+                        Swal.fire({ title: 'Eliminado', text: 'El usuario fue borrado de Supabase.', icon: 'success', background: '#1e293b', color: '#f8fafc' });
+                        loadUsers();
+                    } else {
+                        Swal.fire({ title: 'Error', text: data.error, icon: 'error', background: '#1e293b', color: '#f8fafc' });
+                    }
+                } catch (e) {
+                    Swal.fire({ title: 'Error', text: 'Fallo de red', icon: 'error', background: '#1e293b', color: '#f8fafc' });
+                }
+            }
+        }
+
+        // Cargar usuarios iniciales
+        document.addEventListener('DOMContentLoaded', loadUsers);
+    </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Administrador - VTA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Hanken Grotesk', sans-serif; background-color: #0F172A; color: #dde4e1; }
+        .glass-card { background: #1E293B; border: 1px solid rgba(255, 255, 255, 0.05); }
+    </style>
+</head>
+<body class="h-screen flex items-center justify-center bg-[#0F172A]">
+
+    <div class="glass-card w-full max-w-md p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#2DD4BF] to-[#57f1db]"></div>
+        
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-[#2DD4BF]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-[#2DD4BF] text-3xl">admin_panel_settings</span>
+            </div>
+            <h1 class="text-2xl font-bold text-white">Panel de Administrador</h1>
+            <p class="text-slate-400 text-sm mt-2">VTA Analytics</p>
+        </div>
+
+        {% if error %}
+        <div class="bg-red-900/50 border border-red-500/50 text-red-200 p-3 rounded-lg text-sm mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">error</span>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/login" method="POST" class="space-y-6">
+            <div>
+                <label class="block text-slate-400 text-sm font-semibold mb-2">Contraseña Maestra</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">lock</span>
+                    <input type="password" name="password" required class="w-full bg-[#0F172A] border border-slate-700 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] transition-all">
+                </div>
+            </div>
+            
+            <button type="submit" class="w-full bg-[#2DD4BF] hover:bg-[#57f1db] text-[#003731] font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                <span>Ingresar</span>
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>

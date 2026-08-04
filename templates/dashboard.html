@@ -209,13 +209,16 @@
 </header>
 
 <!-- Dashboard Canvas -->
-<div class="p-8 space-y-6 max-w-[1600px] mx-auto w-full">
+<div class="p-8 space-y-6 max-w-[1600px] mx-auto w-full relative">
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="absolute inset-0 bg-[#0F172A] z-50 flex flex-col items-center justify-center pt-32 transition-opacity duration-500">
+        <div class="w-16 h-16 border-4 border-outline-variant border-t-primary rounded-full animate-spin mb-6"></div>
+        <h2 class="text-2xl font-bold text-on-surface">Cargando datos en vivo...</h2>
+        <p class="text-on-surface-variant text-base mt-2">Conectando con Google Drive</p>
+    </div>
 
     {% if error %}
-    <div class="bg-error-container text-on-error-container p-4 rounded-xl border border-error">
-        <strong>Error al cargar los datos:</strong> {{ error }}
-    </div>
-    {% else %}
 
     <!-- SECCIÓN: RESUMEN GENERAL -->
     <div id="resumen" class="view-section block">
@@ -553,12 +556,37 @@
         });
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const rawDataStr = '{{ datos_excel|safe }}';
-        if (!rawDataStr || rawDataStr === '[]') return;
+    document.addEventListener("DOMContentLoaded", async function() {
+        try {
+            const response = await fetch('/api/data');
+            const result = await response.json();
+            
+            if (result.error) {
+                console.error("Error from API:", result.error);
+                document.getElementById('loading-overlay').innerHTML = `<div class="text-error text-center"><span class="material-symbols-outlined text-4xl mb-2">error</span><h2 class="text-xl font-bold">Error al cargar datos</h2><p>${result.error}</p></div>`;
+                return;
+            }
+            
+            globalRawData = result.data;
+            if (!globalRawData || globalRawData.length === 0) {
+                document.getElementById('loading-overlay').innerHTML = `<div class="text-on-surface text-center"><h2 class="text-xl font-bold">Sin datos</h2><p>No se encontraron datos en el Excel.</p></div>`;
+                return;
+            }
+            
+            // Inicializa selectores y gráficos
+            initMonthSelector();
+            
+            // Ocultar pantalla de carga
+            const overlay = document.getElementById('loading-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 500);
 
-        globalRawData = JSON.parse(rawDataStr);
-        initMonthSelector();
+        } catch (error) {
+            console.error("Fetch error:", error);
+            document.getElementById('loading-overlay').innerHTML = `<div class="text-error text-center"><span class="material-symbols-outlined text-5xl mb-2">wifi_off</span><h2 class="text-xl font-bold">Error de red</h2><p>No se pudo conectar con el servidor.</p></div>`;
+        }
     });
 </script>
 </body></html>

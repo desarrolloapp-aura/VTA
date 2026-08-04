@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 import pandas as pd
 import json
 import os
@@ -11,6 +11,11 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
 async def get_dashboard(request: Request):
+    # Retorna el HTML inmediatamente sin cargar datos
+    return templates.TemplateResponse(request=request, name="dashboard.html")
+
+@app.get("/api/data")
+async def get_data():
     # Obtener URL desde variable de entorno, con fallback a la original por defecto
     default_url = 'https://docs.google.com/uc?export=download&id=1t9cp6K-dcbiVbZTx_VQ76fpTrmx6VUL8'
     url = os.environ.get('EXCEL_URL', default_url)
@@ -37,16 +42,6 @@ async def get_dashboard(request: Request):
                 clean_r[str(k)] = v
             cleaned_records.append(clean_r)
             
-        context = {
-            "request": request,
-            'datos_excel': json.dumps(cleaned_records, default=str),
-            'error': None
-        }
+        return JSONResponse(content={"data": cleaned_records, "error": None})
     except Exception as e:
-        context = {
-            "request": request,
-            'datos_excel': '[]',
-            'error': str(e)
-        }
-        
-    return templates.TemplateResponse(request=request, name="dashboard.html", context=context)
+        return JSONResponse(content={"data": [], "error": str(e)}, status_code=500)

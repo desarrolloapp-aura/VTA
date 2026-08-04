@@ -175,6 +175,11 @@
 <span class="material-symbols-outlined">show_chart</span>
 <span class="">Cumplimiento (%)</span>
 </a>
+
+<a id="nav-custom" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" onclick="switchTab('custom', this)">
+<span class="material-symbols-outlined">magic_button</span>
+<span class="">Crea tu Gráfico</span>
+</a>
 </nav>
 
 <div class="mt-auto space-y-2 pt-4 border-t border-outline-variant">
@@ -293,6 +298,41 @@
         </div>
     </div>
 
+    <!-- SECCIÓN: GRÁFICO PERSONALIZADO -->
+    <div id="custom" class="view-section hidden">
+        <div class="glass-card rounded-xl p-6 flex flex-col min-h-[500px]">
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4">
+                <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Creador de Gráficos Personalizados</h3>
+                
+                <div class="flex flex-wrap gap-3 w-full xl:w-auto">
+                    <select id="customType" class="bg-[#0F172A] border border-outline-variant rounded-lg py-2 px-3 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF]">
+                        <option value="bar">Barras</option>
+                        <option value="line">Líneas</option>
+                    </select>
+                    <select id="customX" class="bg-[#0F172A] border border-outline-variant rounded-lg py-2 px-3 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] flex-1 xl:flex-none">
+                        <option value="">Eje X (Base)</option>
+                    </select>
+                    <select id="customY" class="bg-[#0F172A] border border-outline-variant rounded-lg py-2 px-3 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] flex-1 xl:flex-none">
+                        <option value="">Eje Y (Valores)</option>
+                    </select>
+                    <button onclick="generateCustomChart()" class="bg-[#2DD4BF] text-[#0F172A] font-bold rounded-lg py-2 px-4 hover:bg-[#3cddc7] transition-colors whitespace-nowrap">
+                        Generar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex-1 w-full relative flex items-center justify-center border-2 border-dashed border-outline-variant/30 rounded-lg min-h-[400px]">
+                <div id="custom-placeholder" class="text-on-surface-variant text-center p-4">
+                    <span class="material-symbols-outlined text-4xl mb-2 block">bar_chart</span>
+                    <p>Selecciona las variables arriba y presiona Generar</p>
+                </div>
+                <div id="customCanvasContainer" class="hidden absolute inset-0 p-6">
+                    <canvas id="customCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 </main>
 
@@ -328,7 +368,8 @@
             'resumen': 'Resumen General',
             'equipos': 'Ventas (3500 vs 3700)',
             'grupos': 'Producción (G1 vs G2)',
-            'kpis': 'Cumplimiento (%)'
+            'kpis': 'Cumplimiento (%)',
+            'custom': 'Crea tu Gráfico'
         };
         document.getElementById('page-title').innerText = titles[tabId];
         document.title = titles[tabId] + " - VTA Analytics";
@@ -377,7 +418,9 @@
         }
 
         // Destruir gráficos anteriores si existen
-        Object.values(charts).forEach(c => c.destroy());
+        Object.keys(charts).forEach(key => {
+            if (key !== 'custom') charts[key].destroy();
+        });
 
         const timeToDecimal = (timeStr) => {
             if (!timeStr || typeof timeStr !== 'string') return 0;
@@ -551,6 +594,79 @@
                 }
             }
         });
+
+        if (charts['custom']) {
+            generateCustomChart();
+        }
+    }
+
+    function initCustomSelectors() {
+        if (!globalRawData || globalRawData.length === 0) return;
+        const columns = Object.keys(globalRawData[0]).filter(k => k !== 'Dia' && k !== 'T°' && !k.startsWith('Unnamed'));
+        columns.unshift('T°');
+        columns.unshift('Dia');
+        
+        const selX = document.getElementById('customX');
+        const selY = document.getElementById('customY');
+        
+        columns.forEach(col => {
+            const optX = document.createElement('option');
+            optX.value = col; optX.textContent = col; selX.appendChild(optX);
+            const optY = document.createElement('option');
+            optY.value = col; optY.textContent = col; selY.appendChild(optY);
+        });
+    }
+
+    function generateCustomChart() {
+        const type = document.getElementById('customType').value;
+        const colX = document.getElementById('customX').value;
+        const colY = document.getElementById('customY').value;
+        
+        if (!colX || !colY) return;
+
+        const selectedMonth = document.getElementById('monthSelector').value;
+        let filteredData = globalRawData;
+        if (selectedMonth && selectedMonth !== 'all') {
+            filteredData = globalRawData.filter(d => d['Dia'] && d['Dia'].includes('-' + selectedMonth));
+        }
+        
+        const data = filteredData.filter(d => d[colX] !== null && d[colY] !== null && d[colY] !== 'NaN');
+
+        const labels = data.map(d => {
+            if (colX === 'Dia' && d['T°']) return `${d['Dia']} ${d['T°']}`;
+            return d[colX];
+        });
+        
+        const values = data.map(d => {
+            let val = d[colY];
+            if (typeof val === 'string' && val.includes(':')) {
+                const p = val.split(':');
+                if (p.length >= 2) return parseInt(p[0]) + parseInt(p[1])/60;
+            }
+            return parseFloat(val) || 0;
+        });
+
+        document.getElementById('custom-placeholder').classList.add('hidden');
+        document.getElementById('customCanvasContainer').classList.remove('hidden');
+
+        if (charts['custom']) charts['custom'].destroy();
+
+        const gridColor = 'rgba(255, 255, 255, 0.05)';
+        charts['custom'] = new Chart(document.getElementById('customCanvas'), {
+            type: type,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: colY, data: values,
+                    backgroundColor: type === 'bar' ? '#57f1db' : 'rgba(87, 241, 219, 0.2)',
+                    borderColor: '#57f1db', borderWidth: 2, borderRadius: type === 'bar' ? 4 : 0, fill: type === 'line', tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { x: { grid: { color: gridColor } }, y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor } } }
+            }
+        });
     }
 
     document.addEventListener("DOMContentLoaded", async function() {
@@ -572,6 +688,7 @@
             
             // Inicializa selectores y gráficos
             initMonthSelector();
+            initCustomSelectors();
             
             // Ocultar pantalla de carga
             const overlay = document.getElementById('loading-overlay');

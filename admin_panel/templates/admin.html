@@ -66,11 +66,12 @@
                         <tr class="bg-slate-800/50 text-slate-300 text-sm border-b border-slate-700">
                             <th class="px-6 py-4 font-semibold">Correo Electrónico</th>
                             <th class="px-6 py-4 font-semibold">Fecha de Creación</th>
+                            <th class="px-6 py-4 font-semibold">Rol</th>
                             <th class="px-6 py-4 font-semibold text-right">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="users-table-body" class="divide-y divide-slate-700/50">
-                        <tr><td colspan="3" class="px-6 py-8 text-center text-slate-400">Cargando usuarios...</td></tr>
+                        <tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">Cargando usuarios...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -130,17 +131,22 @@
                 
                 tbody.innerHTML = '';
                 if (data.users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-8 text-center text-slate-400">No hay usuarios registrados.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">No hay usuarios registrados.</td></tr>';
                     return;
                 }
 
                 data.users.forEach(u => {
                     const date = new Date(u.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const roleBadge = u.role === 'admin' 
+                        ? '<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#2DD4BF]/20 text-[#2DD4BF] border border-[#2DD4BF]/30">Admin</span>'
+                        : '<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-700 text-slate-300 border border-slate-600">Visualizador</span>';
+                        
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-800/30 transition-colors";
                     tr.innerHTML = `
                         <td class="px-6 py-4 text-white font-medium">${u.email}</td>
                         <td class="px-6 py-4 text-slate-400 text-sm">${date}</td>
+                        <td class="px-6 py-4">${roleBadge}</td>
                         <td class="px-6 py-4 text-right">
                             <button onclick="deleteUser('${u.id}', '${u.email}')" class="text-red-400 hover:text-red-300 hover:bg-red-400/10 p-2 rounded-lg transition-colors flex items-center justify-center ml-auto" title="Eliminar Usuario">
                                 <span class="material-symbols-outlined">delete</span>

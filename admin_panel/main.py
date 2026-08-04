@@ -15,7 +15,6 @@ templates = Jinja2Templates(directory="templates")
 # Credenciales maestras (¡NUNCA COMPARTIR!)
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
-ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 
 if SUPABASE_URL and SUPABASE_SERVICE_KEY:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
@@ -25,13 +24,15 @@ else:
 
 def verify_admin(request: Request):
     token = request.cookies.get("admin_token")
-    if not token or not ADMIN_EMAIL:
+    if not token:
         return False
     try:
         # Validar el token real de Supabase
         user_res = supabase.auth.get_user(token)
-        if user_res and user_res.user and user_res.user.email == ADMIN_EMAIL:
-            return True
+        if user_res and user_res.user:
+            role = user_res.user.user_metadata.get("role")
+            if role == "admin":
+                return True
     except Exception:
         pass
     return False
@@ -44,20 +45,19 @@ async def login_page(request: Request):
 
 @app.post("/login")
 async def do_login(request: Request, email: str = Form(...), password: str = Form(...)):
-    if not ADMIN_EMAIL:
-        return templates.TemplateResponse("login.html", {"request": request, "error": "Falta configurar ADMIN_EMAIL en el servidor."})
-        
     try:
         # Intentar iniciar sesión real contra Supabase
         res = supabase.auth.sign_in_with_password({"email": email, "password": password})
-        if res.user and res.user.email == ADMIN_EMAIL:
-            # Login exitoso y es el admin correcto
-            response = RedirectResponse(url="/dashboard", status_code=302)
-            # Guardamos el token real que nos dio Supabase en la cookie
-            response.set_cookie(key="admin_token", value=res.session.access_token, httponly=True, secure=True)
-            return response
-        else:
-            return templates.TemplateResponse("login.html", {"request": request, "error": "Este usuario no tiene privilegios de administrador."})
+        if res.user:
+            role = res.user.user_metadata.get("role")
+            if role == "admin":
+                # Login exitoso y es administrador
+                response = RedirectResponse(url="/dashboard", status_code=302)
+                # Guardamos el token real que nos dio Supabase en la cookie
+                response.set_cookie(key="admin_token", value=res.session.access_token, httponly=True, secure=True)
+                return response
+            else:
+                return templates.TemplateResponse("login.html", {"request": request, "error": "Este usuario no tiene privilegios de administrador."})
     except Exception as e:
         error_msg = str(e)
         if "invalid" in error_msg.lower():
@@ -86,8 +86,16 @@ def get_users(request: Request):
     try:
         # El SDK de python expone admin.list_users()
         res = supabase.auth.admin.list_users()
-        # Parse users
-        users = [{"id": u.id, "email": u.email, "created_at": str(u.created_at)} for u in res]
+        # Parse users y sacar rol
+        users = []
+        for u in res:
+            role = u.user_metadata.get("role", "viewer")
+            users.append({
+                "id": u.id, 
+                "email": u.email, 
+                "created_at": str(u.created_at),
+                "role": role
+            })
         return JSONResponse(content={"users": users})
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
@@ -102,7 +110,12 @@ async def create_user(request: Request):
     password = data.get("password")
     
     try:
-        res = supabase.auth.admin.create_user({"email": email, "password": password, "email_confirm": True})
+        res = supabase.auth.admin.create_user({
+            "email": email, 
+            "password": password, 
+            "email_confirm": True,
+            "user_metadata": {"role": "viewer"}
+        })
         return JSONResponse(content={"success": True, "user": res.user.email})
     except Exception as e:
         return JSONResponse(status_code=400, content={"error": str(e)})

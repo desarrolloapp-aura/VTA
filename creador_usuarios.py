@@ -181,6 +181,11 @@ class App(ctk.CTk):
             res = supabase.auth.sign_up({
                 "email": email,
                 "password": pwd,
+                "options": {
+                    "data": {
+                        "role": "admin"
+                    }
+                }
             })
             
             if hasattr(res, 'user') and res.user:

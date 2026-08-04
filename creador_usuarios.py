@@ -64,7 +64,10 @@ class App(ctk.CTk):
         lbl_key = ctk.CTkLabel(frame, text="Llave Pública (anon key)", text_color=self.text_muted, font=("Helvetica", 12))
         lbl_key.pack(anchor="w", padx=30)
         self.entry_key = ctk.CTkEntry(frame, width=350, height=40, fg_color=self.bg_color, border_color="#3c4a46", text_color=self.text_color, show="*")
-        self.entry_key.pack(padx=30, pady=(0, 40))
+        self.entry_key.pack(padx=30, pady=(0, 10))
+        
+        self.check_key = ctk.CTkCheckBox(frame, text="Mostrar llave", text_color=self.text_muted, fg_color=self.primary_color, hover_color="#57f1db", border_color="#3c4a46", checkbox_width=18, checkbox_height=18, command=self.toggle_key)
+        self.check_key.pack(anchor="w", padx=30, pady=(0, 25))
         
         # Boton Guardar
         btn_save = ctk.CTkButton(frame, text="Guardar y Continuar", height=45, fg_color=self.primary_color, text_color="#003731", hover_color="#57f1db", font=("Helvetica", 14, "bold"), command=self.save_config)
@@ -89,7 +92,10 @@ class App(ctk.CTk):
         lbl_pwd = ctk.CTkLabel(frame, text="Contraseña (mínimo 6)", text_color=self.text_muted, font=("Helvetica", 12))
         lbl_pwd.pack(anchor="w", padx=30)
         self.entry_pwd = ctk.CTkEntry(frame, width=350, height=40, fg_color=self.bg_color, border_color="#3c4a46", text_color=self.text_color, show="*")
-        self.entry_pwd.pack(padx=30, pady=(0, 30))
+        self.entry_pwd.pack(padx=30, pady=(0, 10))
+        
+        self.check_pwd = ctk.CTkCheckBox(frame, text="Mostrar contraseña", text_color=self.text_muted, fg_color=self.primary_color, hover_color="#57f1db", border_color="#3c4a46", checkbox_width=18, checkbox_height=18, command=self.toggle_pwd)
+        self.check_pwd.pack(anchor="w", padx=30, pady=(0, 25))
         
         # Boton Registro
         self.btn_register = ctk.CTkButton(frame, text="Crear Usuario", height=45, fg_color=self.primary_color, text_color="#003731", hover_color="#57f1db", font=("Helvetica", 14, "bold"), command=self.register_user)
@@ -108,6 +114,18 @@ class App(ctk.CTk):
     def show_register(self):
         self.config_frame.pack_forget()
         self.register_frame.pack(fill="both", expand=True)
+
+    def toggle_key(self):
+        if self.check_key.get():
+            self.entry_key.configure(show="")
+        else:
+            self.entry_key.configure(show="*")
+            
+    def toggle_pwd(self):
+        if self.check_pwd.get():
+            self.entry_pwd.configure(show="")
+        else:
+            self.entry_pwd.configure(show="*")
 
     def load_config(self):
         if os.path.exists(CONFIG_FILE):

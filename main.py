@@ -4,11 +4,16 @@ from fastapi.responses import HTMLResponse, JSONResponse, Response, RedirectResp
 import pandas as pd
 import json
 import os
+import time
 from supabase import create_client, Client
 
 app = FastAPI(title="Dashboard VTA")
 
 templates = Jinja2Templates(directory="templates")
+
+# Variables globales para caché ligero
+cached_json = None
+last_cache_time = 0
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
@@ -68,10 +73,17 @@ async def get_dashboard(request: Request):
 
 @app.get("/api/data")
 async def get_data(request: Request):
+    global cached_json, last_cache_time
+    
     if supabase:
         user = verify_session(request)
         if not user:
             return Response(content=json.dumps({"error": "No autorizado"}), status_code=401)
+
+    # Si hay caché de menos de 5 minutos, devolver instantáneamente
+    current_time = time.time()
+    if cached_json and (current_time - last_cache_time) < 300:
+        return Response(content=cached_json, media_type="application/json")
 
     # Obtener URL estrictamente desde variable de entorno (por seguridad)
     url = os.environ.get('EXCEL_URL')
@@ -159,6 +171,11 @@ async def get_data(request: Request):
             cleaned_records.append(clean_r)
             
         json_content = json.dumps({"data": cleaned_records, "error": None}, default=str)
+        
+        # Guardar en la caché
+        cached_json = json_content
+        last_cache_time = current_time
+        
         return Response(content=json_content, media_type="application/json")
     except Exception as e:
         json_content = json.dumps({"data": [], "error": str(e)}, default=str)

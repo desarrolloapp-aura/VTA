@@ -1,0 +1,564 @@
+<!DOCTYPE html><html class="dark" lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Resumen General - VTA Analytics</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#3cddc7",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#0e1513",
+                        "on-tertiary": "#00354a",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#3d0026",
+                        "background": "#0e1513",
+                        "on-primary": "#003731",
+                        "surface-variant": "#2f3634",
+                        "secondary-container": "#85145a",
+                        "surface-container-highest": "#2f3634",
+                        "on-primary-fixed-variant": "#005047",
+                        "surface-container-high": "#242b2a",
+                        "outline-variant": "#3c4a46",
+                        "primary-fixed": "#62fae3",
+                        "surface-dim": "#0e1513",
+                        "surface-bright": "#333b39",
+                        "surface-container-low": "#161d1b",
+                        "outline": "#859490",
+                        "on-secondary-fixed-variant": "#85145a",
+                        "on-tertiary-container": "#005371",
+                        "on-tertiary-fixed": "#001e2c",
+                        "secondary": "#ffafd3",
+                        "on-surface": "#dde4e1",
+                        "inverse-on-surface": "#2b3230",
+                        "tertiary-fixed-dim": "#7bd0ff",
+                        "on-secondary-container": "#ff93c8",
+                        "primary": "#57f1db",
+                        "on-background": "#dde4e1",
+                        "primary-container": "#2dd4bf",
+                        "tertiary-fixed": "#c4e7ff",
+                        "on-surface-variant": "#bacac5",
+                        "surface-tint": "#3cddc7",
+                        "inverse-surface": "#dde4e1",
+                        "on-error": "#690005",
+                        "on-primary-container": "#00574d",
+                        "on-secondary": "#620040",
+                        "on-primary-fixed": "#00201c",
+                        "surface-container": "#1a211f",
+                        "on-tertiary-fixed-variant": "#004c69",
+                        "secondary-fixed-dim": "#ffafd3",
+                        "tertiary-container": "#5ec9ff",
+                        "tertiary": "#afe0ff",
+                        "surface-container-lowest": "#09100e",
+                        "inverse-primary": "#006b5f",
+                        "secondary-fixed": "#ffd8e7",
+                        "error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "sidebar_width": "260px",
+                        "container_padding": "32px",
+                        "gutter": "24px",
+                        "card_gap": "24px",
+                        "touch_target": "44px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-sm": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "label-caps": ["JetBrains Mono"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0F172A; /* Override config background for specific guidance dark mode base */
+            color: #dde4e1;
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0F172A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3c4a46;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #57f1db;
+        }
+        .glass-card {
+            background: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-item-active {
+            position: relative;
+        }
+        .nav-item-active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 60%;
+            width: 3px;
+            background-color: #2DD4BF;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .view-section {
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="font-body-md text-body-md antialiased h-screen overflow-hidden flex">
+<!-- SideNavBar -->
+<aside class="w-[260px] h-screen fixed left-0 top-0 bg-[#1E293B] border-r border-outline-variant flex flex-col py-6 px-4 z-50">
+<div class="mb-8 px-3">
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">Dashboard</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">VTA Analytics</p>
+</div>
+<nav class="flex-1 space-y-2">
+<!-- Tabs -->
+<a id="nav-resumen" class="nav-item flex items-center gap-3 px-3 h-[48px] bg-[#1E293B] text-[#2DD4BF] rounded-lg font-bold hover:bg-surface-container-high transition-all nav-item-active cursor-pointer" onclick="switchTab('resumen', this)">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="">Resumen General</span>
+</a>
+
+<a id="nav-equipos" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" onclick="switchTab('equipos', this)">
+<span class="material-symbols-outlined">agriculture</span>
+<span class="">Ventas (3500 vs 3700)</span>
+</a>
+
+<a id="nav-grupos" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" onclick="switchTab('grupos', this)">
+<span class="material-symbols-outlined">groups</span>
+<span class="">Producción (G1 vs G2)</span>
+</a>
+
+<a id="nav-kpis" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" onclick="switchTab('kpis', this)">
+<span class="material-symbols-outlined">show_chart</span>
+<span class="">Cumplimiento (%)</span>
+</a>
+</nav>
+
+<div class="mt-auto space-y-2 pt-4 border-t border-outline-variant">
+<a class="flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="">Configuración</span>
+</a>
+<a class="flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-error hover:bg-surface-container-high transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="">Cerrar Sesión</span>
+</a>
+</div>
+</aside>
+
+<!-- Main Content Area -->
+<main class="ml-[260px] flex-1 h-screen overflow-y-auto bg-[#0F172A] relative flex flex-col">
+<!-- TopNavBar -->
+<header class="h-[72px] sticky top-0 z-40 bg-[#0F172A]/90 backdrop-blur-md flex justify-between items-center px-8 border-b border-outline-variant/30">
+<div>
+<h2 id="page-title" class="font-headline-lg text-headline-lg font-semibold text-on-surface">Resumen General</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Visualización de datos en tiempo real desde Google Drive</p>
+</div>
+<div class="flex items-center gap-6">
+<!-- Selector de meses -->
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">calendar_month</span>
+<select id="monthSelector" class="bg-[#1E293B] border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] w-[250px] transition-all appearance-none cursor-pointer">
+    <option value="all" style="color:#000;">Todos los meses</option>
+</select>
+</div>
+</div>
+</header>
+
+<!-- Dashboard Canvas -->
+<div class="p-8 space-y-6 max-w-[1600px] mx-auto w-full">
+
+    {% if error %}
+    <div class="bg-error-container text-on-error-container p-4 rounded-xl border border-error">
+        <strong>Error al cargar los datos:</strong> {{ error }}
+    </div>
+    {% else %}
+
+    <!-- SECCIÓN: RESUMEN GENERAL -->
+    <div id="resumen" class="view-section block">
+        <!-- Top Row: 2 Columns -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+            <!-- Chart 1: Cumplimiento del Turno en la venta -->
+            <div class="glass-card rounded-xl p-6 flex flex-col min-h-[350px]">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Cumplimiento del Turno en la venta</h3>
+                </div>
+                <div class="flex-1 w-full relative">
+                    <canvas id="chart1"></canvas>
+                </div>
+            </div>
+            
+            <!-- Chart 3: Cumplimiento del Turno en las horas efectivas -->
+            <div class="glass-card rounded-xl p-6 flex flex-col min-h-[350px]">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Cumplimiento del Turno en las horas efectivas</h3>
+                </div>
+                <div class="flex-1 w-full relative">
+                    <canvas id="chart3"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Row: Full Width -->
+        <div class="glass-card rounded-xl p-6 flex flex-col min-h-[400px]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Venta Mensual</h3>
+            </div>
+            <div class="flex-1 w-full relative">
+                <canvas id="chart2"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- SECCIÓN: EQUIPOS -->
+    <div id="equipos" class="view-section hidden">
+        <div class="glass-card rounded-xl p-6 flex flex-col min-h-[500px]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Comparativa de Ventas: 3500 vs 3700</h3>
+            </div>
+            <div class="flex-1 w-full relative">
+                <canvas id="chart4"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- SECCIÓN: GRUPOS -->
+    <div id="grupos" class="view-section hidden">
+        <div class="glass-card rounded-xl p-6 flex flex-col min-h-[500px]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Histórico de Producción: Grupo 1 vs Grupo 2</h3>
+            </div>
+            <div class="flex-1 w-full relative">
+                <canvas id="chart5"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- SECCIÓN: KPIS -->
+    <div id="kpis" class="view-section hidden">
+        <div class="glass-card rounded-xl p-6 flex flex-col min-h-[500px]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Porcentaje de Cumplimiento Diario (%)</h3>
+            </div>
+            <div class="flex-1 w-full relative">
+                <canvas id="chart6"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+</main>
+
+<script>
+    // Variables globales para Chart.js
+    let charts = {};
+    let globalRawData = [];
+
+    // Lógica para cambiar de pestañas sin recargar
+    function switchTab(tabId, element) {
+        // Restaurar estado inactivo a todos los nav-items
+        document.querySelectorAll('.nav-item').forEach(el => {
+            el.classList.remove('nav-item-active', 'bg-[#1E293B]', 'text-[#2DD4BF]', 'font-bold');
+            el.classList.add('text-slate-400');
+        });
+        
+        // Asignar estado activo al seleccionado
+        element.classList.remove('text-slate-400');
+        element.classList.add('nav-item-active', 'bg-[#1E293B]', 'text-[#2DD4BF]', 'font-bold');
+        
+        // Ocultar todas las secciones
+        document.querySelectorAll('.view-section').forEach(el => {
+            el.classList.remove('block');
+            el.classList.add('hidden');
+        });
+        // Mostrar la elegida
+        const targetView = document.getElementById(tabId);
+        targetView.classList.remove('hidden');
+        targetView.classList.add('block');
+
+        // Actualizar el título de la página
+        const titles = {
+            'resumen': 'Resumen General',
+            'equipos': 'Ventas (3500 vs 3700)',
+            'grupos': 'Producción (G1 vs G2)',
+            'kpis': 'Cumplimiento (%)'
+        };
+        document.getElementById('page-title').innerText = titles[tabId];
+        document.title = titles[tabId] + " - VTA Analytics";
+
+        // Disparar evento de resize para que Chart.js redibuje correctamente el tamaño al aparecer
+        window.dispatchEvent(new Event('resize'));
+    }
+
+    function initMonthSelector() {
+        const selector = document.getElementById('monthSelector');
+        const months = new Set();
+        globalRawData.forEach(d => {
+            if (d['Dia'] && d['Dia'] !== 'Dia') {
+                const parts = d['Dia'].split('-');
+                if (parts.length > 1) {
+                    months.add(parts[1]);
+                }
+            }
+        });
+        
+        months.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = 'Mes: ' + m;
+            opt.style.color = '#000';
+            selector.appendChild(opt);
+        });
+
+        selector.addEventListener('change', function() {
+            renderCharts(this.value);
+        });
+        
+        // Auto-seleccionar el último mes disponible por defecto si hay meses
+        const monthsArr = Array.from(months);
+        if (monthsArr.length > 0) {
+            selector.value = monthsArr[monthsArr.length - 1];
+        }
+        
+        renderCharts(selector.value);
+    }
+
+    function renderCharts(selectedMonth) {
+        let filteredData = globalRawData;
+        if (selectedMonth && selectedMonth !== 'all') {
+            filteredData = globalRawData.filter(d => d['Dia'] && d['Dia'].includes('-' + selectedMonth));
+        }
+
+        // Destruir gráficos anteriores si existen
+        Object.values(charts).forEach(c => c.destroy());
+
+        const timeToDecimal = (timeStr) => {
+            if (!timeStr || typeof timeStr !== 'string') return 0;
+            const parts = timeStr.split(':');
+            if (parts.length >= 2) {
+                return parseInt(parts[0]) + parseInt(parts[1])/60;
+            }
+            return 0;
+        };
+
+        // Filtrar filas vacías del final (días futuros sin datos)
+        let lastValidIndex = filteredData.length - 1;
+        for (let i = filteredData.length - 1; i >= 0; i--) {
+            const row = filteredData[i];
+            const venta = parseFloat(row['Venta Real T°']) || 0;
+            const hefect = row['H. efect. 3500'];
+            if (venta > 0 || (hefect && hefect !== "00:00:00" && hefect !== "NaN" && hefect !== null)) {
+                // Si el turno A tiene datos, asegurarnos de incluir también el turno B (i+1) si pertenece al mismo día
+                lastValidIndex = (i % 2 === 0 && i + 1 < filteredData.length) ? i + 1 : i;
+                break;
+            }
+        }
+        
+        const validData = filteredData.slice(0, lastValidIndex + 1);
+        
+        // Extraer últimos 4 turnos (últimos 2 días) para los gráficos 1 y 3
+        const recentData = validData.slice(-4); 
+        const labelsTurnos = recentData.map(d => `${d['Dia']} ${d['T°'] || ''}`);
+        
+        const ventaReal = recentData.map(d => parseFloat(d['Venta Real T°']) || 0);
+        const ventProg = recentData.map(d => parseFloat(d['Vent Prog. T°']) || 0);
+        const cumplVenta = recentData.map(d => (parseFloat(d['% Cumpl. T° $']) || 0) * 100); 
+
+        const hEfect3500 = recentData.map(d => timeToDecimal(d['H. efect. 3500']));
+        const hEfect3700 = recentData.map(d => timeToDecimal(d['H. efect. 3700']));
+        const cumplHE = recentData.map(d => (parseFloat(d['% Cumpl. HE T°']) || 0) * 100);
+
+        const dailyData = validData.filter(d => d['Vent total Real'] !== null && d['Vent total Real'] !== undefined && d['Vent total Real'] !== "NaN");
+        const labelsMensual = dailyData.map(d => d['Dia']);
+        const ventTotalReal = dailyData.map(d => parseFloat(d['Vent total Real']) || 0);
+        const progParcial = dailyData.map(d => parseFloat(d['Prog. Parcial']) || 0);
+        const realAcumulado = dailyData.map(d => parseFloat(d['Real acumulado']) || 0);
+        const progAcum = dailyData.map(d => parseFloat(d['Prog. Acum.']) || 0);
+
+        const vent3500 = recentData.map(d => parseFloat(d['Vent. 3500']) || 0);
+        const vent3700 = recentData.map(d => parseFloat(d['Vent. 3700']) || 0);
+
+        const g1Mensual = dailyData.map(d => parseFloat(d['G1']) || 0);
+        const g2Mensual = dailyData.map(d => parseFloat(d['G2']) || 0);
+
+        const cumplMensual = dailyData.map(d => (parseFloat(d['% cumplimeinto']) || 0) * 100);
+
+        Chart.defaults.font.family = "'Hanken Grotesk', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
+        Chart.defaults.color = '#bacac5'; // on-surface-variant
+
+        const gridColor = 'rgba(255, 255, 255, 0.05)';
+
+        charts['chart1'] = new Chart(document.getElementById('chart1'), {
+            type: 'bar',
+            data: {
+                labels: labelsTurnos,
+                datasets: [
+                    { label: '% Cumpl. T° $', type: 'line', data: cumplVenta, borderColor: '#57f1db', borderWidth: 2, tension: 0.1, yAxisID: 'y1' },
+                    { label: 'Venta Real T°', data: ventaReal, backgroundColor: '#ffb4ab', borderRadius: 4, yAxisID: 'y' },
+                    { label: 'Vent Prog. T°', data: ventProg, backgroundColor: '#2dd4bf', borderRadius: 4, yAxisID: 'y' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: { grid: { color: gridColor } },
+                    y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: {display: true, text: 'MILLONES'} },
+                    y1: { type: 'linear', display: true, position: 'right', grid: {drawOnChartArea: false}, ticks: {callback: function(v){ return v + '%'}} }
+                }
+            }
+        });
+
+        charts['chart3'] = new Chart(document.getElementById('chart3'), {
+            type: 'bar',
+            data: {
+                labels: labelsTurnos,
+                datasets: [
+                    { label: '% Cumpl. HE T°', type: 'line', data: cumplHE, borderColor: '#ffb4ab', borderWidth: 2, tension: 0.1, yAxisID: 'y1' },
+                    { label: 'H. efect. 3500', data: hEfect3500, backgroundColor: '#00574d', borderRadius: 4, yAxisID: 'y' },
+                    { label: 'H. efect. 3700', data: hEfect3700, backgroundColor: '#ffafd3', borderRadius: 4, yAxisID: 'y' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: { grid: { color: gridColor } },
+                    y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: {display: true, text: 'HORAS (Decimal)'} },
+                    y1: { type: 'linear', display: true, position: 'right', grid: {drawOnChartArea: false}, ticks: {callback: function(v){ return v + '%'}} }
+                }
+            }
+        });
+
+        charts['chart2'] = new Chart(document.getElementById('chart2'), {
+            type: 'bar',
+            data: {
+                labels: labelsMensual,
+                datasets: [
+                    { label: 'Prog. Acum.', type: 'line', data: progAcum, borderColor: '#57f1db', borderWidth: 2, tension: 0.1, yAxisID: 'y1' },
+                    { label: 'Real acumulado', type: 'line', data: realAcumulado, borderColor: '#ffb4ab', borderWidth: 2, tension: 0.1, yAxisID: 'y1' },
+                    { label: 'Vent total Real', data: ventTotalReal, backgroundColor: 'rgba(255, 180, 171, 0.4)', borderColor: '#ffb4ab', borderWidth: 1, yAxisID: 'y' },
+                    { label: 'Prog. Parcial', data: progParcial, backgroundColor: '#2dd4bf', yAxisID: 'y' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: { grid: { color: gridColor } },
+                    y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: {display: true, text: 'MILLONES'} },
+                    y1: { type: 'linear', display: true, position: 'right', grid: {drawOnChartArea: false}, title: {display: true, text: 'MILLONES (Acumulado)'} }
+                }
+            }
+        });
+
+        // Gráfico 4: Equipos (Barras agrupadas)
+        charts['chart4'] = new Chart(document.getElementById('chart4'), {
+            type: 'bar',
+            data: {
+                labels: labelsTurnos,
+                datasets: [
+                    { label: 'Vent. 3500', data: vent3500, backgroundColor: '#2dd4bf', borderRadius: 4 },
+                    { label: 'Vent. 3700', data: vent3700, backgroundColor: '#ffb4ab', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: { grid: { color: gridColor } },
+                    y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: {display: true, text: 'MILLONES'} }
+                }
+            }
+        });
+
+        // Gráfico 5: Grupos (Áreas)
+        charts['chart5'] = new Chart(document.getElementById('chart5'), {
+            type: 'line',
+            data: {
+                labels: labelsMensual,
+                datasets: [
+                    { label: 'Grupo 1 (G1)', data: g1Mensual, borderColor: '#57f1db', backgroundColor: 'rgba(87, 241, 219, 0.2)', fill: true, tension: 0.3 },
+                    { label: 'Grupo 2 (G2)', data: g2Mensual, borderColor: '#ffafd3', backgroundColor: 'rgba(255, 175, 211, 0.2)', fill: true, tension: 0.3 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: { grid: { color: gridColor } },
+                    y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: {display: true, text: 'VOLUMEN (G1 / G2)'} }
+                }
+            }
+        });
+
+        // Gráfico 6: KPIs Cumplimiento
+        charts['chart6'] = new Chart(document.getElementById('chart6'), {
+            type: 'line',
+            data: {
+                labels: labelsMensual,
+                datasets: [
+                    { label: '% Cumplimiento Mensual', data: cumplMensual, borderColor: '#3cddc7', borderWidth: 3, pointBackgroundColor: '#3cddc7', pointRadius: 4, tension: 0.1 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: { grid: { color: gridColor } },
+                    y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: {display: true, text: 'PORCENTAJE (%)'}, ticks: {callback: function(v){ return v + '%'}} }
+                }
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const rawDataStr = '{{ datos_excel|safe }}';
+        if (!rawDataStr || rawDataStr === '[]') return;
+
+        globalRawData = JSON.parse(rawDataStr);
+        initMonthSelector();
+    });
+</script>
+</body></html>

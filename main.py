@@ -8,6 +8,7 @@ import time
 import threading
 import io
 import urllib.request
+import asyncio
 from supabase import create_client, Client
 
 app = FastAPI(title="Dashboard VTA")
@@ -25,6 +26,7 @@ else:
 cached_json = None
 last_cache_time = 0
 is_fetching = False
+data_lock = threading.Lock()
 
 def process_excel_data():
     url = os.environ.get('EXCEL_URL')
@@ -50,8 +52,8 @@ def process_excel_data():
     current_g_aa = 'G1'
     current_g_ab = 'G2'
     
-    for i in range(len(df_raw)):
-        row = df_raw.iloc[i]
+    values = df_raw.values
+    for row in values:
         val_aa = row[col_aa_idx]
         val_ab = row[col_ab_idx]
         
@@ -123,9 +125,10 @@ def fetch_data_background():
     if is_fetching: return
     is_fetching = True
     try:
-        json_content = process_excel_data()
-        cached_json = json_content
-        last_cache_time = time.time()
+        with data_lock:
+            json_content = process_excel_data()
+            cached_json = json_content
+            last_cache_time = time.time()
     except Exception as e:
         print("Error en pre-carga de login:", e)
     finally:
@@ -180,8 +183,10 @@ async def get_dashboard(request: Request):
         
     return templates.TemplateResponse(request=request, name="dashboard.html")
 
+# Cambiamos async def por def normal para que FastAPI lo ejecute en un Threadpool
+# y no bloquee el hilo principal mientras Pandas procesa.
 @app.get("/api/data")
-async def get_data(request: Request, background_tasks: BackgroundTasks):
+def get_data(request: Request, background_tasks: BackgroundTasks):
     global cached_json, last_cache_time
     
     if supabase:
@@ -202,9 +207,13 @@ async def get_data(request: Request, background_tasks: BackgroundTasks):
         
     # Si no hay caché absoluto (primer inicio del servidor), debemos procesarlo
     try:
-        json_content = process_excel_data()
-        cached_json = json_content
-        last_cache_time = time.time()
+        # Bloqueamos para asegurar que solo un proceso a la vez lea el Excel
+        with data_lock:
+            if cached_json and (time.time() - last_cache_time) < 300:
+                return Response(content=cached_json, media_type="application/json")
+            json_content = process_excel_data()
+            cached_json = json_content
+            last_cache_time = time.time()
         return Response(content=json_content, media_type="application/json")
     except Exception as e:
         json_content = json.dumps({"data": [], "error": str(e)}, default=str)

@@ -15,7 +15,7 @@ templates = Jinja2Templates(directory="templates")
 # Credenciales maestras (¡NUNCA COMPARTIR!)
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123") # Cambiar en Render
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 
 if SUPABASE_URL and SUPABASE_SERVICE_KEY:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
@@ -25,8 +25,15 @@ else:
 
 def verify_admin(request: Request):
     token = request.cookies.get("admin_token")
-    if token == ADMIN_PASSWORD:
-        return True
+    if not token or not ADMIN_EMAIL:
+        return False
+    try:
+        # Validar el token real de Supabase
+        user_res = supabase.auth.get_user(token)
+        if user_res and user_res.user and user_res.user.email == ADMIN_EMAIL:
+            return True
+    except Exception:
+        pass
     return False
 
 @app.get("/", response_class=HTMLResponse)
@@ -36,12 +43,26 @@ async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 @app.post("/login")
-async def do_login(request: Request, password: str = Form(...)):
-    if password == ADMIN_PASSWORD:
-        response = RedirectResponse(url="/dashboard", status_code=302)
-        response.set_cookie(key="admin_token", value=password, httponly=True, secure=True)
-        return response
-    return templates.TemplateResponse("login.html", {"request": request, "error": "Contraseña incorrecta."})
+async def do_login(request: Request, email: str = Form(...), password: str = Form(...)):
+    if not ADMIN_EMAIL:
+        return templates.TemplateResponse("login.html", {"request": request, "error": "Falta configurar ADMIN_EMAIL en el servidor."})
+        
+    try:
+        # Intentar iniciar sesión real contra Supabase
+        res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+        if res.user and res.user.email == ADMIN_EMAIL:
+            # Login exitoso y es el admin correcto
+            response = RedirectResponse(url="/dashboard", status_code=302)
+            # Guardamos el token real que nos dio Supabase en la cookie
+            response.set_cookie(key="admin_token", value=res.session.access_token, httponly=True, secure=True)
+            return response
+        else:
+            return templates.TemplateResponse("login.html", {"request": request, "error": "Este usuario no tiene privilegios de administrador."})
+    except Exception as e:
+        error_msg = str(e)
+        if "invalid" in error_msg.lower():
+            return templates.TemplateResponse("login.html", {"request": request, "error": "Correo o contraseña incorrectos."})
+        return templates.TemplateResponse("login.html", {"request": request, "error": error_msg})
 
 @app.get("/logout")
 async def logout(request: Request):

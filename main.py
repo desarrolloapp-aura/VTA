@@ -22,14 +22,58 @@ async def get_data():
         raise ValueError("La variable de entorno EXCEL_URL no está configurada en Render.")
     
     try:
-        # Descargamos directamente la hoja 'Venta' del excel de drive
+        df_raw = pd.read_excel(url, sheet_name='Venta', header=None)
+        
+        # Buscar columnas de grupos (G1, G2) en la fila de encabezados (fila 2, index 1)
+        col_aa_idx, col_ab_idx = 26, 27
+        for i, val in enumerate(df_raw.iloc[1]):
+            if str(val).strip() == 'G1': col_aa_idx = i
+            elif str(val).strip() == 'G2': col_ab_idx = i
+            
+        df_raw[2] = df_raw[2].ffill()
+        
+        group_data = {}
+        current_g_aa = 'G1'
+        current_g_ab = 'G2'
+        
+        for i in range(len(df_raw)):
+            row = df_raw.iloc[i]
+            val_aa = row[col_aa_idx]
+            val_ab = row[col_ab_idx]
+            
+            if isinstance(val_aa, str) and str(val_aa).strip().startswith('G'):
+                current_g_aa = str(val_aa).strip()
+                current_g_ab = str(val_ab).strip() if pd.notna(val_ab) else None
+                continue
+                
+            dia = row[2]
+            turno = row[3]
+            
+            if pd.notna(dia) and str(dia) != 'Dia' and not str(dia).startswith('Unnamed'):
+                if pd.notna(turno):
+                    key = f"{dia}_{turno}"
+                    if key not in group_data: group_data[key] = {}
+                    
+                    try:
+                        group_data[key][current_g_aa] = float(val_aa) if pd.notna(val_aa) else 0
+                    except:
+                        pass
+                        
+                    if current_g_ab:
+                        try:
+                            group_data[key][current_g_ab] = float(val_ab) if pd.notna(val_ab) else 0
+                        except:
+                            pass
+
+        # Procesamiento normal
         df = pd.read_excel(url, sheet_name='Venta', header=1)
         
-        # Llenar las fechas combinadas (Turno A y B comparten la misma fecha)
+        # Llenar las fechas combinadas
+        df['Raw_Dia'] = df['Dia']
         df['Dia'] = df['Dia'].ffill()
-        # Limpiar datos: remover filas donde 'Dia' es nulo o es encabezado
         df = df.dropna(subset=['Dia'])
         df = df[df['Dia'] != 'Dia']
+        
         # Formatear la fecha
         df['Dia'] = pd.to_datetime(df['Dia']).dt.strftime('%d-%b')
         
@@ -40,7 +84,21 @@ async def get_data():
             for k, v in r.items():
                 if pd.isna(v) or str(k).startswith('Unnamed:'):
                     continue
+                if str(k) in ['G1', 'G2', 'Raw_Dia']:
+                    continue
                 clean_r[str(k)] = v
+                
+            # Inyectar grupos dinámicos
+            key = f"{r.get('Raw_Dia')}_{r.get('T°')}"
+            if key in group_data:
+                for g_col, g_val in group_data[key].items():
+                    clean_r[g_col] = g_val
+                    
+            # Si no se inyectó un grupo particular, inicializarlo en 0 para evitar errores de renderizado
+            for g in ['G1', 'G2', 'G3', 'G4']:
+                if g not in clean_r:
+                    clean_r[g] = 0
+                    
             cleaned_records.append(clean_r)
             
         json_content = json.dumps({"data": cleaned_records, "error": None}, default=str)

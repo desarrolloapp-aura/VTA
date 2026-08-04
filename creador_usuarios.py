@@ -1,191 +1,186 @@
 import os
+import sys
 import json
-import ctypes
 import customtkinter as ctk
+import tkinter.messagebox as messagebox
 
 try:
     from supabase import create_client, Client
 except ImportError:
-    pass  # Asumimos que está instalado cuando se compila
+    pass
 
-# Archivo para guardar la configuración
 CONFIG_FILE = "config.json"
 
-# Configuración del tema (imitar diseño de Stitch)
+# Configuración del tema (Imitando el fondo oscuro y detalles teal)
 ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("green") # Cambiaremos colores manualmente para que sea "#2DD4BF"
+ctk.set_default_color_theme("green") 
 
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
-
-        self.title("Aura - Creador de Usuarios")
-        self.geometry("450x650")
-        self.configure(fg_color="#0F172A") # Fondo oscuro principal
+        
+        self.title("VTA Analytics - Creador de Usuarios")
+        self.geometry("450x550")
         self.resizable(False, False)
-
-        # Variables
-        self.url_var = ctk.StringVar()
-        self.key_var = ctk.StringVar()
-        self.email_var = ctk.StringVar()
-        self.password_var = ctk.StringVar()
-
+        
+        # Colores personalizados basados en el UI de Stitch
+        self.bg_color = "#0e1513"
+        self.surface_color = "#161d1b"
+        self.primary_color = "#2dd4bf"
+        self.text_color = "#dde4e1"
+        self.text_muted = "#859490"
+        
+        self.configure(fg_color=self.bg_color)
+        
+        # Estado
+        self.supabase_url = ""
+        self.supabase_key = ""
+        
+        # Contenedor Principal
+        self.main_container = ctk.CTkFrame(self, fg_color="transparent")
+        self.main_container.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        # Inicializar Pantallas
+        self.config_frame = self.create_config_frame()
+        self.register_frame = self.create_register_frame()
+        
+        # Cargar configuración e iniciar en la pantalla correcta
         self.load_config()
 
-        # Título Principal
-        self.lbl_title = ctk.CTkLabel(
-            self, text="Registro de Usuarios", 
-            font=("Helvetica", 24, "bold"), text_color="#dde4e1"
-        )
-        self.lbl_title.pack(pady=(30, 5))
+    def create_config_frame(self):
+        frame = ctk.CTkFrame(self.main_container, fg_color=self.surface_color, corner_radius=15)
         
-        self.lbl_subtitle = ctk.CTkLabel(
-            self, text="Panel de Seguridad VTA Analytics", 
-            font=("Helvetica", 14), text_color="#859490"
-        )
-        self.lbl_subtitle.pack(pady=(0, 20))
-
-        # --- FRAME DE CONFIGURACIÓN ---
-        self.config_frame = ctk.CTkFrame(self, fg_color="#1E293B", corner_radius=15, border_width=1, border_color="#3c4a46")
-        self.config_frame.pack(padx=30, pady=10, fill="x")
-
-        self.lbl_config_title = ctk.CTkLabel(
-            self.config_frame, text="Configuración (Supabase)", 
-            font=("Helvetica", 12, "bold"), text_color="#57f1db"
-        )
-        self.lbl_config_title.pack(anchor="w", padx=20, pady=(15, 5))
-
-        self.entry_url = ctk.CTkEntry(
-            self.config_frame, textvariable=self.url_var, 
-            placeholder_text="SUPABASE_URL", width=300, height=35,
-            fg_color="#0F172A", border_color="#3c4a46", text_color="white", corner_radius=8
-        )
-        self.entry_url.pack(padx=20, pady=5)
-
-        self.entry_key = ctk.CTkEntry(
-            self.config_frame, textvariable=self.key_var, 
-            placeholder_text="SUPABASE_KEY (anon)", width=300, height=35, show="*",
-            fg_color="#0F172A", border_color="#3c4a46", text_color="white", corner_radius=8
-        )
-        self.entry_key.pack(padx=20, pady=(5, 20))
-
-        # --- FRAME DE REGISTRO ---
-        self.user_frame = ctk.CTkFrame(self, fg_color="#1E293B", corner_radius=15, border_width=1, border_color="#3c4a46")
-        self.user_frame.pack(padx=30, pady=10, fill="x")
-
-        self.lbl_user_title = ctk.CTkLabel(
-            self.user_frame, text="Nuevo Usuario", 
-            font=("Helvetica", 12, "bold"), text_color="#57f1db"
-        )
-        self.lbl_user_title.pack(anchor="w", padx=20, pady=(15, 5))
-
-        self.entry_email = ctk.CTkEntry(
-            self.user_frame, textvariable=self.email_var, 
-            placeholder_text="Correo Electrónico", width=300, height=35,
-            fg_color="#0F172A", border_color="#3c4a46", text_color="white", corner_radius=8
-        )
-        self.entry_email.pack(padx=20, pady=5)
-
-        self.entry_password = ctk.CTkEntry(
-            self.user_frame, textvariable=self.password_var, 
-            placeholder_text="Contraseña (mínimo 6 caracteres)", width=300, height=35, show="*",
-            fg_color="#0F172A", border_color="#3c4a46", text_color="white", corner_radius=8
-        )
-        self.entry_password.pack(padx=20, pady=(5, 20))
-
-        # --- BOTÓN DE REGISTRO ---
-        self.btn_register = ctk.CTkButton(
-            self, text="Crear Usuario", command=self.register_user,
-            width=300, height=45, corner_radius=8,
-            fg_color="#2DD4BF", hover_color="#3cddc7", text_color="#0F172A",
-            font=("Helvetica", 14, "bold")
-        )
-        self.btn_register.pack(pady=20)
-
-        # --- ETIQUETA DE ESTADO ---
-        self.lbl_status = ctk.CTkLabel(
-            self, text="", 
-            font=("Helvetica", 14), text_color="white"
-        )
-        self.lbl_status.pack(pady=(0, 20))
+        # Titulo
+        title = ctk.CTkLabel(frame, text="Configuración (Supabase)", font=("Helvetica", 20, "bold"), text_color=self.text_color)
+        title.pack(pady=(40, 30))
         
-        # Ocultar consola en Windows si es posible
-        try:
-            ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 0)
-        except Exception:
-            pass
+        # URL
+        lbl_url = ctk.CTkLabel(frame, text="URL del Proyecto", text_color=self.text_muted, font=("Helvetica", 12))
+        lbl_url.pack(anchor="w", padx=30)
+        self.entry_url = ctk.CTkEntry(frame, width=350, height=40, fg_color=self.bg_color, border_color="#3c4a46", text_color=self.text_color)
+        self.entry_url.pack(padx=30, pady=(0, 20))
+        
+        # Key
+        lbl_key = ctk.CTkLabel(frame, text="Llave Pública (anon key)", text_color=self.text_muted, font=("Helvetica", 12))
+        lbl_key.pack(anchor="w", padx=30)
+        self.entry_key = ctk.CTkEntry(frame, width=350, height=40, fg_color=self.bg_color, border_color="#3c4a46", text_color=self.text_color, show="*")
+        self.entry_key.pack(padx=30, pady=(0, 40))
+        
+        # Boton Guardar
+        btn_save = ctk.CTkButton(frame, text="Guardar y Continuar", height=45, fg_color=self.primary_color, text_color="#003731", hover_color="#57f1db", font=("Helvetica", 14, "bold"), command=self.save_config)
+        btn_save.pack(padx=30, pady=(0, 30), fill="x")
+        
+        return frame
+
+    def create_register_frame(self):
+        frame = ctk.CTkFrame(self.main_container, fg_color=self.surface_color, corner_radius=15)
+        
+        # Titulo
+        title = ctk.CTkLabel(frame, text="Registro de Nuevo Usuario", font=("Helvetica", 20, "bold"), text_color=self.text_color)
+        title.pack(pady=(40, 30))
+        
+        # Email
+        lbl_email = ctk.CTkLabel(frame, text="Correo Electrónico", text_color=self.text_muted, font=("Helvetica", 12))
+        lbl_email.pack(anchor="w", padx=30)
+        self.entry_email = ctk.CTkEntry(frame, width=350, height=40, fg_color=self.bg_color, border_color="#3c4a46", text_color=self.text_color)
+        self.entry_email.pack(padx=30, pady=(0, 20))
+        
+        # Password
+        lbl_pwd = ctk.CTkLabel(frame, text="Contraseña (mínimo 6)", text_color=self.text_muted, font=("Helvetica", 12))
+        lbl_pwd.pack(anchor="w", padx=30)
+        self.entry_pwd = ctk.CTkEntry(frame, width=350, height=40, fg_color=self.bg_color, border_color="#3c4a46", text_color=self.text_color, show="*")
+        self.entry_pwd.pack(padx=30, pady=(0, 30))
+        
+        # Boton Registro
+        self.btn_register = ctk.CTkButton(frame, text="Crear Usuario", height=45, fg_color=self.primary_color, text_color="#003731", hover_color="#57f1db", font=("Helvetica", 14, "bold"), command=self.register_user)
+        self.btn_register.pack(padx=30, fill="x")
+        
+        # Boton Volver
+        btn_back = ctk.CTkButton(frame, text="Volver a Configuración", height=30, fg_color="transparent", text_color=self.text_muted, hover_color=self.bg_color, command=self.show_config)
+        btn_back.pack(padx=30, pady=20)
+        
+        return frame
+
+    def show_config(self):
+        self.register_frame.pack_forget()
+        self.config_frame.pack(fill="both", expand=True)
+        
+    def show_register(self):
+        self.config_frame.pack_forget()
+        self.register_frame.pack(fill="both", expand=True)
 
     def load_config(self):
         if os.path.exists(CONFIG_FILE):
             try:
                 with open(CONFIG_FILE, "r") as f:
                     data = json.load(f)
-                    self.url_var.set(data.get("url", ""))
-                    self.key_var.set(data.get("key", ""))
+                    self.supabase_url = data.get("url", "")
+                    self.supabase_key = data.get("key", "")
+                    
+                if self.supabase_url and self.supabase_key:
+                    self.entry_url.insert(0, self.supabase_url)
+                    self.entry_key.insert(0, self.supabase_key)
+                    self.show_register()
+                    return
             except Exception:
                 pass
+        self.show_config()
 
     def save_config(self):
-        data = {
-            "url": self.url_var.get().strip(),
-            "key": self.key_var.get().strip()
-        }
+        url = self.entry_url.get().strip()
+        key = self.entry_key.get().strip()
+        
+        if not url or not key:
+            messagebox.showerror("Error", "Debes completar ambos campos.")
+            return
+            
+        self.supabase_url = url
+        self.supabase_key = key
+        
         try:
             with open(CONFIG_FILE, "w") as f:
-                json.dump(data, f)
-        except Exception:
-            pass
-
-    def show_message(self, message, is_error=False):
-        color = "#ffb4ab" if is_error else "#57f1db"
-        self.lbl_status.configure(text=message, text_color=color)
+                json.dump({"url": url, "key": key}, f)
+            self.show_register()
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo guardar la configuración: {e}")
 
     def register_user(self):
-        url = self.url_var.get().strip()
-        key = self.key_var.get().strip()
-        email = self.email_var.get().strip()
-        password = self.password_var.get().strip()
-
-        if not url or not key:
-            self.show_message("Error: Faltan las llaves de Supabase", is_error=True)
-            return
+        email = self.entry_email.get().strip()
+        pwd = self.entry_pwd.get().strip()
         
-        if not email or not password:
-            self.show_message("Error: Ingresa correo y contraseña", is_error=True)
+        if not email or not pwd:
+            messagebox.showerror("Error", "Faltan datos. Ingresa correo y contraseña.")
             return
+        if len(pwd) < 6:
+            messagebox.showerror("Error", "La contraseña debe tener al menos 6 caracteres.")
+            return
+            
+        self.btn_register.configure(state="disabled", text="Procesando...")
+        self.update()
         
-        if len(password) < 6:
-            self.show_message("Error: La contraseña debe tener al menos 6 caracteres", is_error=True)
-            return
-
-        # Guardar URL y Key para la próxima vez
-        self.save_config()
-        self.show_message("Conectando con la bóveda...", is_error=False)
-        self.update() # Refrescar GUI
-
         try:
-            supabase: Client = create_client(url, key)
+            supabase: Client = create_client(self.supabase_url, self.supabase_key)
             res = supabase.auth.sign_up({
                 "email": email,
-                "password": password,
+                "password": pwd,
             })
             
             if hasattr(res, 'user') and res.user:
-                self.show_message(f"¡Éxito! Usuario {email} creado.", is_error=False)
-                # Limpiar campos de registro
-                self.email_var.set("")
-                self.password_var.set("")
+                messagebox.showinfo("¡Éxito!", f"El usuario {email} ha sido creado correctamente.")
+                self.entry_email.delete(0, 'end')
+                self.entry_pwd.delete(0, 'end')
             else:
-                self.show_message("Error desconocido al crear el usuario.", is_error=True)
-                
+                messagebox.showerror("Error", "Error desconocido al crear el usuario.")
         except Exception as e:
             error_msg = str(e)
             if "already registered" in error_msg.lower():
-                self.show_message("Error: Este correo ya está registrado.", is_error=True)
+                messagebox.showerror("Error", "Este correo electrónico ya está registrado.")
             elif "invalid login credentials" in error_msg.lower():
-                self.show_message("Error: Las llaves de Supabase son incorrectas.", is_error=True)
+                messagebox.showerror("Error", "Las llaves de Supabase son incorrectas. Vuelve a configuración y revísalas.")
             else:
-                self.show_message(f"Error: {error_msg[:40]}...", is_error=True)
+                messagebox.showerror("Error", error_msg[:60])
+                
+        self.btn_register.configure(state="normal", text="Crear Usuario")
 
 if __name__ == "__main__":
     app = App()

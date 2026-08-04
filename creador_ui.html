@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>VTA Analytics - Creador de Usuarios</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#bacac5",
+                        "tertiary": "#afe0ff",
+                        "on-primary-container": "#00574d",
+                        "on-primary": "#003731",
+                        "secondary-container": "#85145a",
+                        "surface-container-lowest": "#09100e",
+                        "on-secondary-fixed-variant": "#85145a",
+                        "on-tertiary": "#00354a",
+                        "background": "#0e1513",
+                        "surface-tint": "#3cddc7",
+                        "on-secondary-container": "#ff93c8",
+                        "surface-container-high": "#242b2a",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#ffafd3",
+                        "surface-dim": "#0e1513",
+                        "surface-container-low": "#161d1b",
+                        "primary": "#57f1db",
+                        "on-background": "#dde4e1",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed": "#001e2c",
+                        "on-tertiary-container": "#005371",
+                        "primary-fixed-dim": "#3cddc7",
+                        "outline-variant": "#3c4a46",
+                        "primary-fixed": "#62fae3",
+                        "on-secondary": "#620040",
+                        "primary-container": "#2dd4bf",
+                        "inverse-primary": "#006b5f",
+                        "on-tertiary-fixed-variant": "#004c69",
+                        "tertiary-fixed-dim": "#7bd0ff",
+                        "surface-bright": "#333b39",
+                        "surface-variant": "#2f3634",
+                        "surface-container": "#1a211f",
+                        "tertiary-container": "#5ec9ff",
+                        "on-surface": "#dde4e1",
+                        "outline": "#859490",
+                        "inverse-on-surface": "#2b3230",
+                        "inverse-surface": "#dde4e1",
+                        "on-primary-fixed-variant": "#005047",
+                        "surface": "#0e1513",
+                        "on-primary-fixed": "#00201c",
+                        "on-secondary-fixed": "#3d0026",
+                        "surface-container-highest": "#2f3634",
+                        "on-error-container": "#ffdad6",
+                        "error-container": "#93000a",
+                        "secondary-fixed": "#ffd8e7",
+                        "tertiary-fixed": "#c4e7ff",
+                        "secondary": "#ffafd3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "sidebar_width": "260px",
+                        "container_padding": "32px",
+                        "card_gap": "24px",
+                        "touch_target": "44px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "body-sm": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen overflow-hidden">
+    <!-- Decorative background glow for depth -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] pointer-events-none -z-10"></div>
+    
+    <!-- CONFIG SCREEN -->
+    <main id="config-screen" class="min-h-screen flex flex-col items-center justify-center p-6 relative transition-opacity duration-500 opacity-0 hidden">
+        <div class="w-full max-w-xl z-10">
+            <div class="flex flex-col items-center justify-center text-center mb-10">
+                <div class="w-16 h-16 rounded-2xl bg-surface-container-high flex items-center justify-center border border-outline-variant mb-6 shadow-lg">
+                    <span class="material-symbols-outlined text-primary text-3xl" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+                </div>
+                <h1 class="font-display-lg text-headline-lg md:text-display-lg font-bold text-on-surface mb-2 tracking-tight">Configuración del Sistema</h1>
+                <p class="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto">VTA Analytics Setup Inicial. Ingresa las credenciales de tu base de datos para continuar.</p>
+            </div>
+            <div class="bg-surface-container rounded-xl p-8 border border-[rgba(255,255,255,0.05)] shadow-2xl relative overflow-hidden">
+                <div class="flex items-center gap-3 mb-8 pb-4 border-b border-outline-variant">
+                    <div class="w-8 h-8 rounded bg-surface-container-high flex items-center justify-center border border-outline-variant">
+                        <span class="material-symbols-outlined text-primary text-sm" data-icon="database">database</span>
+                    </div>
+                    <h3 class="font-label-caps text-label-caps uppercase text-on-surface tracking-wider">Configuración (Supabase)</h3>
+                </div>
+                <form id="configForm" class="space-y-6 relative z-10" onsubmit="event.preventDefault(); saveConfig();">
+                    <div class="flex flex-col gap-2">
+                        <label class="font-body-md text-body-md font-semibold text-on-surface" for="projectUrl">URL del Proyecto (Project URL)</label>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant mb-1">La URL base de tu instancia de Supabase.</p>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-70" data-icon="link">link</span>
+                            <input class="w-full h-[48px] bg-background border border-outline-variant rounded-lg pl-12 pr-4 text-on-surface font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-inner" id="projectUrl" type="url" placeholder="https://..." required/>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="font-body-md text-body-md font-semibold text-on-surface" for="anonKey">Llave Pública (anon key)</label>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant mb-1">Clave de cliente pública (anon) segura para usar en el navegador.</p>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-70" data-icon="key">key</span>
+                            <input class="w-full h-[48px] bg-background border border-outline-variant rounded-lg pl-12 pr-12 text-on-surface font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-mono shadow-inner" id="anonKey" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6Ik..." required/>
+                        </div>
+                    </div>
+                    <div class="pt-6">
+                        <button id="btnSave" class="w-full h-[48px] px-8 bg-primary hover:bg-primary-fixed text-on-primary-fixed font-headline-md text-body-lg !font-bold rounded-lg transition-colors shadow-[0_4px_14px_0_rgba(45,212,191,0.2)] flex items-center justify-center gap-2" type="submit">
+                            <span class="material-symbols-outlined text-[20px]" data-icon="save">save</span> Guardar y Continuar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- REGISTER SCREEN -->
+    <main id="register-screen" class="min-h-screen flex flex-col items-center justify-center p-6 relative transition-opacity duration-500 opacity-0 hidden">
+        <div class="w-full max-w-[480px] z-10 relative">
+            <div class="bg-surface-container-low rounded-xl border border-outline-variant p-8 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-primary-container"></div>
+                <div class="flex flex-col items-center mb-8">
+                    <div class="w-12 h-12 rounded-lg bg-surface-container-highest border border-outline-variant flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-primary text-[24px]" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+                    </div>
+                    <h2 class="font-label-caps text-label-caps text-primary tracking-widest uppercase mb-2">VTA Analytics</h2>
+                    <h1 class="font-headline-md text-headline-md text-on-surface text-center">Registro de Nuevo Usuario</h1>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-2 text-center">Complete los campos para autorizar el acceso.</p>
+                </div>
+                <form id="registerForm" class="flex flex-col gap-6" onsubmit="event.preventDefault(); registerUser();">
+                    <div class="flex flex-col gap-2">
+                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase" for="email">Correo Electrónico</label>
+                        <div class="relative group">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors" data-icon="mail">mail</span>
+                            <input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-10 pr-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all" id="email" placeholder="usuario@empresa.com" required type="email"/>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase" for="password">Contraseña</label>
+                        <div class="relative group">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors" data-icon="lock">lock</span>
+                            <input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-10 pr-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all" id="password" minlength="6" placeholder="••••••••" required type="password"/>
+                        </div>
+                        <div class="flex items-center gap-1 mt-1">
+                            <span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="info">info</span>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant text-[12px]">Mínimo 6 caracteres</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button id="btnRegister" class="w-full bg-primary-container text-on-primary-container font-label-caps text-label-caps uppercase h-touch_target rounded-lg flex items-center justify-center gap-2 hover:bg-primary transition-all active:scale-[0.98] shadow-[0_0_15px_rgba(45,212,191,0.15)] hover:shadow-[0_0_20px_rgba(45,212,191,0.25)]" type="submit">
+                            <span class="material-symbols-outlined" data-icon="person_add">person_add</span> Crear Usuario
+                        </button>
+                    </div>
+                    <div class="flex justify-center mt-2">
+                        <button type="button" onclick="showConfigScreen()" class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors bg-transparent border-0 cursor-pointer">Volver a Configuración</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function showScreen(screenId) {
+            const screens = document.querySelectorAll('main');
+            let anyVisible = false;
+            
+            // Check if any is currently visible to animate out
+            screens.forEach(el => {
+                if (!el.classList.contains('hidden')) {
+                    anyVisible = true;
+                    el.classList.add('opacity-0');
+                    setTimeout(() => {
+                        el.classList.add('hidden');
+                        el.classList.remove('flex');
+                        
+                        // Show the new one
+                        const newScreen = document.getElementById(screenId);
+                        newScreen.classList.remove('hidden');
+                        newScreen.classList.add('flex');
+                        // Small delay to allow display:flex to apply before animating opacity
+                        setTimeout(() => { newScreen.classList.remove('opacity-0'); }, 50);
+                    }, 400); // Wait for fade out
+                }
+            });
+
+            // If none were visible (initial load), just show it
+            if (!anyVisible) {
+                const newScreen = document.getElementById(screenId);
+                newScreen.classList.remove('hidden');
+                newScreen.classList.add('flex');
+                setTimeout(() => { newScreen.classList.remove('opacity-0'); }, 50);
+            }
+        }
+
+        function showConfigScreen() { showScreen('config-screen'); }
+        function showRegisterScreen() { showScreen('register-screen'); }
+
+        // Start listening to pywebview readiness
+        window.addEventListener('pywebviewready', async function() {
+            try {
+                const config = await pywebview.api.get_config();
+                if (config.url && config.key) {
+                    document.getElementById('projectUrl').value = config.url;
+                    document.getElementById('anonKey').value = config.key;
+                    showRegisterScreen();
+                } else {
+                    showConfigScreen();
+                }
+            } catch(e) {
+                showConfigScreen();
+            }
+        });
+
+        async function saveConfig() {
+            const btn = document.getElementById('btnSave');
+            btn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span> Guardando...';
+            btn.disabled = true;
+
+            const url = document.getElementById('projectUrl').value;
+            const key = document.getElementById('anonKey').value;
+            
+            try {
+                const result = await pywebview.api.save_config(url, key);
+                if(result.success) {
+                    showRegisterScreen();
+                } else {
+                    Swal.fire({ title: 'Error', text: result.error, icon: 'error', background: '#1e293b', color: '#f8fafc' });
+                }
+            } catch(e) {
+                Swal.fire({ title: 'Error', text: 'Error de comunicación local.', icon: 'error', background: '#1e293b', color: '#f8fafc' });
+            } finally {
+                btn.innerHTML = '<span class="material-symbols-outlined text-[20px]">save</span> Guardar y Continuar';
+                btn.disabled = false;
+            }
+        }
+
+        async function registerUser() {
+            const btn = document.getElementById('btnRegister');
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Procesando...';
+            btn.disabled = true;
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const result = await pywebview.api.register_user(email, password);
+                if (result.success) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: `El usuario ${email} fue creado.`,
+                        icon: 'success',
+                        background: '#1e293b',
+                        color: '#f8fafc',
+                        confirmButtonColor: '#2DD4BF'
+                    });
+                    document.getElementById('email').value = '';
+                    document.getElementById('password').value = '';
+                } else {
+                    Swal.fire({
+                        title: 'Error de Registro',
+                        text: result.error,
+                        icon: 'error',
+                        background: '#1e293b',
+                        color: '#f8fafc',
+                        confirmButtonColor: '#2DD4BF'
+                    });
+                }
+            } catch(e) {
+                Swal.fire({ title: 'Error', text: 'Error interno.', icon: 'error', background: '#1e293b', color: '#f8fafc' });
+            } finally {
+                btn.innerHTML = '<span class="material-symbols-outlined">person_add</span> Crear Usuario';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

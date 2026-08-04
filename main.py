@@ -6,6 +6,8 @@ import json
 import os
 import time
 import threading
+import io
+import urllib.request
 from supabase import create_client, Client
 
 app = FastAPI(title="Dashboard VTA")
@@ -29,7 +31,12 @@ def process_excel_data():
     if not url:
         raise ValueError("La variable de entorno EXCEL_URL no está configurada en Render.")
     
-    df_raw = pd.read_excel(url, sheet_name='Venta', header=None)
+    # Descargar el archivo a la memoria UNA SOLA VEZ para acelerar al doble
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    with urllib.request.urlopen(req) as response:
+        file_bytes = io.BytesIO(response.read())
+        
+    df_raw = pd.read_excel(file_bytes, sheet_name='Venta', header=None)
     
     # Buscar columnas de grupos (G1, G2) en la fila de encabezados (fila 2, index 1)
     col_aa_idx, col_ab_idx = 26, 27
@@ -72,8 +79,9 @@ def process_excel_data():
                     except:
                         pass
 
-    # Procesamiento normal
-    df = pd.read_excel(url, sheet_name='Venta', header=1)
+    # Procesamiento normal (leer de nuevo desde memoria)
+    file_bytes.seek(0)
+    df = pd.read_excel(file_bytes, sheet_name='Venta', header=1)
     
     # Llenar las fechas combinadas
     df['Raw_Dia'] = df['Dia']
@@ -173,20 +181,30 @@ async def get_dashboard(request: Request):
     return templates.TemplateResponse(request=request, name="dashboard.html")
 
 @app.get("/api/data")
-async def get_data(request: Request):
+async def get_data(request: Request, background_tasks: BackgroundTasks):
+    global cached_json, last_cache_time
+    
     if supabase:
         user = verify_session(request)
         if not user:
             return Response(content=json.dumps({"error": "No autorizado"}), status_code=401)
 
-    # Si hay una precarga hecha hace menos de 60 segundos (ej. desde el login), úsala
-    # Si han pasado más de 60 segundos (ej. el usuario hace F5 en el dashboard), descarga el Excel fresco
     current_time = time.time()
-    if cached_json and (current_time - last_cache_time) < 60:
+    
+    # ESTRATEGIA STALE-WHILE-REVALIDATE: 
+    # Si hay caché, lo devolvemos INSTANTÁNEAMENTE (0 segundos de espera).
+    # Si el caché tiene más de 5 minutos, lanzamos una tarea invisible para actualizarlo
+    # en segundo plano, así la próxima vez tendrá los datos frescos sin hacer esperar a nadie.
+    if cached_json:
+        if (current_time - last_cache_time) > 300: # 5 minutos (300s)
+            background_tasks.add_task(fetch_data_background)
         return Response(content=cached_json, media_type="application/json")
         
+    # Si no hay caché absoluto (primer inicio del servidor), debemos procesarlo
     try:
         json_content = process_excel_data()
+        cached_json = json_content
+        last_cache_time = time.time()
         return Response(content=json_content, media_type="application/json")
     except Exception as e:
         json_content = json.dumps({"data": [], "error": str(e)}, default=str)

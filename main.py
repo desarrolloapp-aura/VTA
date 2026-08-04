@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 import pandas as pd
 import json
 import os
@@ -42,6 +42,8 @@ async def get_data():
                 clean_r[str(k)] = v
             cleaned_records.append(clean_r)
             
-        return JSONResponse(content={"data": cleaned_records, "error": None})
+        json_content = json.dumps({"data": cleaned_records, "error": None}, default=str)
+        return Response(content=json_content, media_type="application/json")
     except Exception as e:
-        return JSONResponse(content={"data": [], "error": str(e)}, status_code=500)
+        json_content = json.dumps({"data": [], "error": str(e)}, default=str)
+        return Response(content=json_content, media_type="application/json", status_code=500)

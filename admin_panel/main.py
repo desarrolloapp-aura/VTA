@@ -37,11 +37,15 @@ def verify_admin(request: Request):
         pass
     return False
 
-@app.get("/", response_class=HTMLResponse)
-async def login_page(request: Request):
+@app.get("/")
+def index(request: Request):
+    return RedirectResponse(url="/login", status_code=302)
+
+@app.get("/login")
+def login_page(request: Request):
     if verify_admin(request):
         return RedirectResponse(url="/dashboard", status_code=302)
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="login.html")
 
 @app.post("/login")
 async def do_login(request: Request, email: str = Form(...), password: str = Form(...)):
@@ -57,12 +61,12 @@ async def do_login(request: Request, email: str = Form(...), password: str = For
                 response.set_cookie(key="admin_token", value=res.session.access_token, httponly=True, secure=True)
                 return response
             else:
-                return templates.TemplateResponse("login.html", {"request": request, "error": "Este usuario no tiene privilegios de administrador."})
+                return templates.TemplateResponse(request=request, name="login.html", context={"error": "Este usuario no tiene privilegios de administrador."})
     except Exception as e:
         error_msg = str(e)
         if "invalid" in error_msg.lower():
-            return templates.TemplateResponse("login.html", {"request": request, "error": "Correo o contraseña incorrectos."})
-        return templates.TemplateResponse("login.html", {"request": request, "error": error_msg})
+            return templates.TemplateResponse(request=request, name="login.html", context={"error": "Credenciales inválidas."})
+        return templates.TemplateResponse(request=request, name="login.html", context={"error": error_msg})
 
 @app.get("/logout")
 async def logout(request: Request):
@@ -70,11 +74,11 @@ async def logout(request: Request):
     response.delete_cookie("admin_token")
     return response
 
-@app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard_page(request: Request):
+@app.get("/dashboard")
+def dashboard(request: Request):
     if not verify_admin(request):
-        return RedirectResponse(url="/", status_code=302)
-    return templates.TemplateResponse("admin.html", {"request": request})
+        return RedirectResponse(url="/login", status_code=302)
+    return templates.TemplateResponse(request=request, name="admin.html")
 
 @app.get("/api/users")
 def get_users(request: Request):

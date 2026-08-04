@@ -3,6 +3,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 import pandas as pd
 import json
+import os
 
 app = FastAPI(title="Dashboard VTA")
 
@@ -10,7 +11,9 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
 async def get_dashboard(request: Request):
-    url = 'https://docs.google.com/uc?export=download&id=1t9cp6K-dcbiVbZTx_VQ76fpTrmx6VUL8'
+    # Obtener URL desde variable de entorno, con fallback a la original por defecto
+    default_url = 'https://docs.google.com/uc?export=download&id=1t9cp6K-dcbiVbZTx_VQ76fpTrmx6VUL8'
+    url = os.environ.get('EXCEL_URL', default_url)
     
     try:
         # Descargamos directamente la hoja 'Venta' del excel de drive

@@ -17,18 +17,22 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 
 if SUPABASE_URL and SUPABASE_SERVICE_KEY:
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    # Creamos un cliente global solo para cosas que no muten el estado
+    pass
 else:
-    supabase = None
     print("ADVERTENCIA: Faltan credenciales de Supabase (URL o SERVICE_KEY).")
+
+def get_client() -> Client:
+    return create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 def verify_admin(request: Request):
     token = request.cookies.get("admin_token")
     if not token:
         return False
     try:
+        db = get_client()
         # Validar el token real de Supabase
-        user_res = supabase.auth.get_user(token)
+        user_res = db.auth.get_user(token)
         if user_res and user_res.user:
             role = user_res.user.user_metadata.get("role")
             if role == "admin":
@@ -50,8 +54,9 @@ def login_page(request: Request):
 @app.post("/login")
 async def do_login(request: Request, email: str = Form(...), password: str = Form(...)):
     try:
+        db = get_client()
         # Intentar iniciar sesión real contra Supabase
-        res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+        res = db.auth.sign_in_with_password({"email": email, "password": password})
         if res.user:
             role = res.user.user_metadata.get("role")
             if role == "admin":
@@ -84,12 +89,13 @@ def dashboard(request: Request):
 def get_users(request: Request):
     if not verify_admin(request):
         return Response(status_code=401)
-    if not supabase:
-        return JSONResponse(status_code=500, content={"error": "Supabase no está configurado con Service Key."})
+    if not SUPABASE_URL:
+        return JSONResponse(status_code=500, content={"error": "Supabase no está configurado."})
     
     try:
+        db = get_client()
         # El SDK de python expone admin.list_users()
-        res = supabase.auth.admin.list_users()
+        res = db.auth.admin.list_users()
         # Parse users y sacar rol
         users = []
         for u in res:
@@ -114,7 +120,8 @@ async def create_user(request: Request):
     password = data.get("password")
     
     try:
-        res = supabase.auth.admin.create_user({
+        db = get_client()
+        res = db.auth.admin.create_user({
             "email": email, 
             "password": password, 
             "email_confirm": True,
@@ -130,7 +137,8 @@ def delete_user(request: Request, uid: str):
         return Response(status_code=401)
     
     try:
-        supabase.auth.admin.delete_user(uid)
+        db = get_client()
+        db.auth.admin.delete_user(uid)
         return JSONResponse(content={"success": True})
     except Exception as e:
         return JSONResponse(status_code=400, content={"error": str(e)})

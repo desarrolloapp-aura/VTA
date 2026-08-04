@@ -16,9 +16,10 @@ async def get_dashboard(request: Request):
 
 @app.get("/api/data")
 async def get_data():
-    # Obtener URL desde variable de entorno, con fallback a la original por defecto
-    default_url = 'https://docs.google.com/uc?export=download&id=1t9cp6K-dcbiVbZTx_VQ76fpTrmx6VUL8'
-    url = os.environ.get('EXCEL_URL', default_url)
+    # Obtener URL estrictamente desde variable de entorno (por seguridad)
+    url = os.environ.get('EXCEL_URL')
+    if not url:
+        raise ValueError("La variable de entorno EXCEL_URL no está configurada en Render.")
     
     try:
         # Descargamos directamente la hoja 'Venta' del excel de drive

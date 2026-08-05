@@ -160,3 +160,43 @@ def delete_user(request: Request, uid: str):
         return JSONResponse(content={"success": True})
     except Exception as e:
         return JSONResponse(status_code=400, content={"error": str(e)})
+
+@app.get("/api/planillas")
+def get_planillas(request: Request):
+    if not verify_admin(request):
+        return Response(status_code=401)
+    if not SUPABASE_URL:
+        return JSONResponse(status_code=500, content={"error": "Supabase no está configurado."})
+    try:
+        db = get_client()
+        res = db.table("planillas_excel").select("*").order("creado_en", desc=True).execute()
+        return JSONResponse(content={"planillas": res.data if res.data else []})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.post("/api/planillas")
+async def add_planilla(request: Request):
+    if not verify_admin(request):
+        return Response(status_code=401)
+    data = await request.json()
+    nombre = data.get("nombre")
+    url = data.get("url")
+    if not nombre or not url:
+        return JSONResponse(status_code=400, content={"error": "Faltan datos"})
+    try:
+        db = get_client()
+        res = db.table("planillas_excel").insert({"nombre": nombre, "url": url}).execute()
+        return JSONResponse(content={"success": True, "data": res.data[0] if res.data else None})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.delete("/api/planillas/{pid}")
+def delete_planilla(request: Request, pid: str):
+    if not verify_admin(request):
+        return Response(status_code=401)
+    try:
+        db = get_client()
+        db.table("planillas_excel").delete().eq("id", pid).execute()
+        return JSONResponse(content={"success": True})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})

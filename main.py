@@ -245,26 +245,6 @@ def get_planillas(request: Request):
         return JSONResponse(content={"data": [{"id": "default", "nombre": "Planilla Actual (Por Defecto)", "url": url}]})
     return JSONResponse(content={"data": []})
 
-@app.post("/api/planillas")
-async def add_planilla(request: Request):
-    if not verify_session(request):
-        return Response(content=json.dumps({"error": "No autorizado"}), status_code=401)
-        
-    data = await request.json()
-    nombre = data.get("nombre")
-    url = data.get("url")
-    
-    if not nombre or not url:
-        return Response(content=json.dumps({"error": "Faltan datos"}), status_code=400)
-        
-    if supabase:
-        try:
-            res = supabase.table("planillas_excel").insert({"nombre": nombre, "url": url}).execute()
-            return JSONResponse(content={"success": True, "data": res.data[0] if res.data else None})
-        except Exception as e:
-            return Response(content=json.dumps({"error": str(e)}), status_code=500)
-    return Response(content=json.dumps({"error": "Base de datos no configurada"}), status_code=500)
-
 @app.get("/api/data")
 def get_data(request: Request, background_tasks: BackgroundTasks, planilla_id: str = "default", url: str = None):
     if supabase:

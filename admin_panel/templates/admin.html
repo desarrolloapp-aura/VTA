@@ -35,6 +35,10 @@
                 <span class="material-symbols-outlined">person_add</span>
                 Registrar Usuario
             </a>
+            <a onclick="switchTab('planillas', this)" class="nav-item flex items-center gap-3 px-3 py-3 rounded-r-lg text-sm font-semibold cursor-pointer text-slate-400 transition-all hover:bg-slate-800">
+                <span class="material-symbols-outlined">table_chart</span>
+                Gestión de Planillas
+            </a>
         </nav>
 
         <div class="px-6 mt-auto">
@@ -97,6 +101,41 @@
             </div>
         </div>
 
+        <!-- Vista: Planillas -->
+        <div id="view-planillas" class="max-w-4xl mx-auto hidden">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-white">Gestión de Planillas</h2>
+                    <p class="text-slate-400 mt-1">Administra los enlaces a los documentos de Google Sheets.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="showAddPlanilla()" class="bg-[#2DD4BF] hover:bg-[#57f1db] text-[#003731] font-bold py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined">add</span>
+                        Nueva
+                    </button>
+                    <button onclick="loadPlanillas()" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition-colors" title="Actualizar lista">
+                        <span class="material-symbols-outlined">refresh</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="glass-card rounded-xl overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800/50 text-slate-300 text-sm border-b border-slate-700">
+                            <th class="px-6 py-4 font-semibold">Nombre</th>
+                            <th class="px-6 py-4 font-semibold">Fecha de Agregado</th>
+                            <th class="px-6 py-4 font-semibold">URL</th>
+                            <th class="px-6 py-4 font-semibold text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="planillas-table-body" class="divide-y divide-slate-700/50">
+                        <tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">Cargando planillas...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </main>
 
     <script>
@@ -110,9 +149,11 @@
 
             document.getElementById('view-listado').classList.add('hidden');
             document.getElementById('view-registro').classList.add('hidden');
+            document.getElementById('view-planillas').classList.add('hidden');
             document.getElementById('view-' + tab).classList.remove('hidden');
 
             if (tab === 'listado') loadUsers();
+            if (tab === 'planillas') loadPlanillas();
         }
 
         async function loadUsers() {
@@ -206,6 +247,114 @@
                     if (data.success) {
                         Swal.fire({ title: 'Eliminado', text: 'El usuario fue borrado de Supabase.', icon: 'success', background: '#1e293b', color: '#f8fafc' });
                         loadUsers();
+                    } else {
+                        Swal.fire({ title: 'Error', text: data.error, icon: 'error', background: '#1e293b', color: '#f8fafc' });
+                    }
+                } catch (e) {
+                    Swal.fire({ title: 'Error', text: 'Fallo de red', icon: 'error', background: '#1e293b', color: '#f8fafc' });
+                }
+            }
+        }
+
+        async function loadPlanillas() {
+            const tbody = document.getElementById('planillas-table-body');
+            tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400"><div class="animate-spin w-6 h-6 border-2 border-[#2DD4BF] border-t-transparent rounded-full mx-auto"></div></td></tr>';
+            
+            try {
+                const res = await fetch('/api/planillas');
+                const data = await res.json();
+                
+                if (data.error) throw new Error(data.error);
+                
+                tbody.innerHTML = '';
+                if (!data.planillas || data.planillas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">No hay planillas registradas.</td></tr>';
+                    return;
+                }
+
+                data.planillas.forEach(p => {
+                    const date = new Date(p.creado_en).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-800/30 transition-colors";
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 text-white font-medium">${p.nombre}</td>
+                        <td class="px-6 py-4 text-slate-400 text-sm">${date}</td>
+                        <td class="px-6 py-4 text-slate-400 text-sm truncate max-w-[200px]" title="${p.url}">${p.url}</td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="deletePlanilla('${p.id}', '${p.nombre}')" class="text-red-400 hover:text-red-300 hover:bg-red-400/10 p-2 rounded-lg transition-colors inline-flex items-center justify-center" title="Eliminar Planilla">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-red-400">Error al cargar planillas: ${e.message}</td></tr>`;
+            }
+        }
+
+        async function showAddPlanilla() {
+            const { value: formValues } = await Swal.fire({
+                title: 'Agregar Planilla (Mes/Año)',
+                html:
+                    '<input id="swal-nombre" class="swal2-input" placeholder="Nombre (ej: Febrero 2024)">' +
+                    '<input id="swal-url" class="swal2-input" placeholder="URL compartida del archivo (ej: Sharepoint)">',
+                focusConfirm: false,
+                background: '#1e293b',
+                color: '#f8fafc',
+                showCancelButton: true,
+                confirmButtonText: 'Guardar Planilla',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#2DD4BF',
+                preConfirm: () => {
+                    return {
+                        nombre: document.getElementById('swal-nombre').value,
+                        url: document.getElementById('swal-url').value
+                    }
+                }
+            });
+
+            if (formValues && formValues.nombre && formValues.url) {
+                Swal.fire({title: 'Guardando...', background: '#1e293b', color: '#f8fafc', didOpen: () => {Swal.showLoading()}});
+                try {
+                    const res = await fetch('/api/planillas', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(formValues)
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        Swal.fire({title: '¡Éxito!', text: 'Planilla agregada.', icon: 'success', background: '#1e293b', color: '#f8fafc'});
+                        loadPlanillas();
+                    } else {
+                        Swal.fire({title: 'Error', text: data.error || 'No se pudo guardar', icon: 'error', background: '#1e293b', color: '#f8fafc'});
+                    }
+                } catch(e) {
+                    Swal.fire({title: 'Error', text: 'Fallo de red', icon: 'error', background: '#1e293b', color: '#f8fafc'});
+                }
+            }
+        }
+
+        async function deletePlanilla(pid, nombre) {
+            const confirm = await Swal.fire({
+                title: '¿Estás seguro?',
+                html: `Vas a eliminar permanentemente la planilla <b class="text-white">${nombre}</b>.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#334155',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                background: '#1e293b', color: '#f8fafc'
+            });
+
+            if (confirm.isConfirmed) {
+                try {
+                    const res = await fetch(`/api/planillas/${pid}`, { method: 'DELETE' });
+                    const data = await res.json();
+                    if (data.success) {
+                        Swal.fire({ title: 'Eliminado', text: 'Planilla borrada exitosamente.', icon: 'success', background: '#1e293b', color: '#f8fafc' });
+                        loadPlanillas();
                     } else {
                         Swal.fire({ title: 'Error', text: data.error, icon: 'error', background: '#1e293b', color: '#f8fafc' });
                     }

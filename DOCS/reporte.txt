@@ -1,1 +1,0 @@
-dejar con login apartadp, tener 2 login, uno local.exe, que los crea y el otro que inicie sesión nomas en la pagina web

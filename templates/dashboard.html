@@ -1,17 +1,24 @@
-<!DOCTYPE html><html class="dark" lang="es"><head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>Resumen General - VTA Analytics</title>
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!DOCTYPE html>
+<html class="dark" lang="es">
 
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<script id="tailwind-config">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Resumen General - VTA Analytics</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -103,34 +110,41 @@
             }
         }
     </script>
-<style>
+    <style>
         body {
-            background-color: #0F172A; /* Override config background for specific guidance dark mode base */
+            background-color: #0F172A;
+            /* Override config background for specific guidance dark mode base */
             color: #dde4e1;
         }
+
         /* Custom scrollbar for webkit */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
+
         ::-webkit-scrollbar-track {
             background: #0F172A;
         }
+
         ::-webkit-scrollbar-thumb {
             background: #3c4a46;
             border-radius: 4px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: #57f1db;
         }
+
         .glass-card {
             background: #1E293B;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .nav-item-active {
             position: relative;
         }
+
         .nav-item-active::before {
             content: '';
             position: absolute;
@@ -146,742 +160,746 @@
         .view-section {
             animation: fadeIn 0.4s ease;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
+
 <body class="font-body-md text-body-md antialiased h-screen overflow-hidden flex bg-[#0F172A]">
 
-<!-- Mobile Menu Overlay -->
-<div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
 
-<!-- SideNavBar -->
-<aside id="sidebar" class="w-[260px] h-screen fixed left-0 top-0 bg-[#1E293B] border-r border-outline-variant flex flex-col py-6 px-4 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
-<div class="mb-8 px-3 flex justify-between items-center">
-    <div>
-        <h1 class="font-headline-md text-headline-md font-bold text-on-surface">Dashboard</h1>
-        <p class="font-body-sm text-body-sm text-on-surface-variant">VTA Analytics</p>
-    </div>
-    <button class="md:hidden text-slate-400 hover:text-white" onclick="toggleSidebar()">
-        <span class="material-symbols-outlined">close</span>
-    </button>
-</div>
-<nav class="flex-1 space-y-2">
-<!-- Tabs -->
-<a id="nav-resumen" class="nav-item flex items-center gap-3 px-3 h-[48px] bg-[#1E293B] text-[#2DD4BF] rounded-lg font-bold hover:bg-surface-container-high transition-all nav-item-active cursor-pointer" onclick="switchTab('resumen', this)">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
-<span class="">Resumen General</span>
-</a>
+    <!-- SideNavBar -->
+    <aside id="sidebar"
+        class="w-[260px] h-screen fixed left-0 top-0 bg-[#1E293B] border-r border-outline-variant flex flex-col py-6 px-4 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <div class="mb-8 px-3 flex justify-between items-center">
+            <div>
+                <h1 class="font-headline-md text-headline-md font-bold text-on-surface">Dashboard</h1>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">VTA Analytics</p>
+            </div>
+            <button class="md:hidden text-slate-400 hover:text-white" onclick="toggleSidebar()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <nav class="flex-1 space-y-2">
+            <!-- Tabs -->
+            <a id="nav-resumen"
+                class="nav-item flex items-center gap-3 px-3 h-[48px] bg-[#1E293B] text-[#2DD4BF] rounded-lg font-bold hover:bg-surface-container-high transition-all nav-item-active cursor-pointer"
+                onclick="switchTab('resumen', this)">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                <span class="">Resumen General</span>
+            </a>
 
-<a id="nav-equipos" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" onclick="switchTab('equipos', this)">
-<span class="material-symbols-outlined">agriculture</span>
-<span class="">Ventas (3500 vs 3700)</span>
-</a>
+            <a id="nav-equipos"
+                class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer"
+                onclick="switchTab('equipos', this)">
+                <span class="material-symbols-outlined">agriculture</span>
+                <span class="">Ventas (3500 vs 3700)</span>
+            </a>
 
-<a id="nav-grupos" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" onclick="switchTab('grupos', this)">
-<span class="material-symbols-outlined">groups</span>
-<span class="">Producción (Grupos)</span>
-</a>
+            <a id="nav-grupos"
+                class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer"
+                onclick="switchTab('grupos', this)">
+                <span class="material-symbols-outlined">groups</span>
+                <span class="">Producción (Grupos)</span>
+            </a>
 
-<a id="nav-kpis" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" onclick="switchTab('kpis', this)">
-<span class="material-symbols-outlined">show_chart</span>
-<span class="">Cumplimiento (%)</span>
-</a>
+            <a id="nav-kpis"
+                class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer"
+                onclick="switchTab('kpis', this)">
+                <span class="material-symbols-outlined">show_chart</span>
+                <span class="">Cumplimiento (%)</span>
+            </a>
 
-<a id="nav-custom" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer" onclick="switchTab('custom', this)">
-<span class="material-symbols-outlined">magic_button</span>
-<span class="">Crea tu Gráfico</span>
-</a>
-</nav>
+            <a id="nav-custom"
+                class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer"
+                onclick="switchTab('custom', this)">
+                <span class="material-symbols-outlined">magic_button</span>
+                <span class="">Crea tu Gráfico</span>
+            </a>
+        </nav>
 
         <div class="mt-auto pt-6 border-t border-surface-container-high space-y-2">
-            <a onclick="showSettingsMessage()" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer">
-                <span class="material-symbols-outlined">settings</span>
-                <span class="">Configuración</span>
-            </a>
-            <a href="/logout" class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer">
+            <a href="/logout"
+                class="nav-item flex items-center gap-3 px-3 h-[48px] text-slate-400 hover:text-on-surface hover:bg-surface-container-high transition-all rounded-lg cursor-pointer">
                 <span class="material-symbols-outlined">logout</span>
                 <span class="">Cerrar Sesión</span>
             </a>
         </div>
-</aside>
+    </aside>
 
-<!-- Main Content Area -->
-<main class="w-full md:ml-[260px] flex-1 h-screen overflow-y-auto bg-[#0F172A] relative flex flex-col">
-<!-- TopNavBar -->
-<header class="h-auto min-h-[72px] sticky top-0 z-30 bg-[#0F172A]/90 backdrop-blur-md flex flex-col md:flex-row justify-between items-start md:items-center px-4 md:px-8 py-4 border-b border-outline-variant/30 gap-4">
-    <div class="flex items-center gap-3 w-full md:w-auto">
-        <button class="md:hidden text-slate-300 hover:text-white mt-1" onclick="toggleSidebar()">
-            <span class="material-symbols-outlined text-3xl">menu</span>
-        </button>
-        <div>
-            <h2 id="page-title" class="font-headline-lg text-headline-lg font-semibold text-on-surface leading-tight text-xl md:text-3xl">Resumen General</h2>
-            <p class="font-body-sm text-body-sm text-on-surface-variant hidden md:block">Visualización de datos en tiempo real desde Google Drive</p>
-        </div>
-    </div>
-    <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
-        <!-- Selector de Planillas -->
-        <div class="relative w-full md:w-auto">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">table_chart</span>
-            <select id="planillaSelector" class="bg-[#1E293B] border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] w-full md:w-[250px] transition-all appearance-none cursor-pointer" onchange="changePlanilla()">
-                <option value="default" style="color:#000;">Cargando planillas...</option>
-            </select>
-        </div>
-        <!-- Selector de meses -->
-        <div class="relative w-full md:w-auto">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">calendar_month</span>
-            <select id="monthSelector" class="bg-[#1E293B] border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] w-full md:w-[200px] transition-all appearance-none cursor-pointer">
-                <option value="all" style="color:#000;">Todos los meses</option>
-            </select>
-        </div>
-    </div>
-</header>
-
-<!-- Dashboard Canvas -->
-<div class="p-4 md:p-8 space-y-6 max-w-[1600px] mx-auto w-full relative">
-
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="absolute inset-0 bg-[#0F172A] z-50 flex flex-col items-center justify-center pt-32 transition-opacity duration-500">
-        <div class="w-16 h-16 border-4 border-outline-variant border-t-primary rounded-full animate-spin mb-6"></div>
-        <h2 class="text-2xl font-bold text-on-surface">Cargando datos en vivo...</h2>
-        <p class="text-on-surface-variant text-base mt-2">Conectando con Google Drive</p>
-    </div>
-
-    <!-- SECCIÓN: RESUMEN GENERAL -->
-    <div id="resumen" class="view-section block">
-        <!-- Top Row: 2 Columns -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-            <!-- Chart 1: Cumplimiento del Turno en la venta -->
-            <div class="glass-card rounded-xl p-6 flex flex-col min-h-[350px]">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Cumplimiento del Turno en la venta</h3>
-                </div>
-                <div class="flex-1 w-full relative">
-                    <canvas id="chart1"></canvas>
+    <!-- Main Content Area -->
+    <main class="w-full md:ml-[260px] flex-1 h-screen overflow-y-auto bg-[#0F172A] relative flex flex-col">
+        <!-- TopNavBar -->
+        <header
+            class="h-auto min-h-[72px] sticky top-0 z-30 bg-[#0F172A]/90 backdrop-blur-md flex flex-col md:flex-row justify-between items-start md:items-center px-4 md:px-8 py-4 border-b border-outline-variant/30 gap-4">
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <button class="md:hidden text-slate-300 hover:text-white mt-1" onclick="toggleSidebar()">
+                    <span class="material-symbols-outlined text-3xl">menu</span>
+                </button>
+                <div>
+                    <h2 id="page-title"
+                        class="font-headline-lg text-headline-lg font-semibold text-on-surface leading-tight text-xl md:text-3xl">
+                        Resumen General</h2>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant hidden md:block">Visualización de datos
+                        en tiempo real desde Google Drive</p>
                 </div>
             </div>
-            
-            <!-- Chart 3: Cumplimiento del Turno en las horas efectivas -->
-            <div class="glass-card rounded-xl p-6 flex flex-col min-h-[350px]">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Cumplimiento del Turno en las horas efectivas</h3>
-                </div>
-                <div class="flex-1 w-full relative">
-                    <canvas id="chart3"></canvas>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Bottom Row: Full Width -->
-        <div class="glass-card rounded-xl p-6 flex flex-col min-h-[400px]">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Venta Mensual</h3>
-            </div>
-            <div class="flex-1 w-full relative">
-                <canvas id="chart2"></canvas>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- SECCIÓN: EQUIPOS -->
-    <div id="equipos" class="view-section hidden">
-        <div class="glass-card rounded-xl p-4 md:p-6 flex flex-col min-h-[350px] md:min-h-[500px]">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Comparativa de Ventas: 3500 vs 3700</h3>
-            </div>
-            <div class="flex-1 w-full relative">
-                <canvas id="chart4"></canvas>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- SECCIÓN: GRUPOS -->
-    <div id="grupos" class="view-section hidden">
-        <div class="glass-card rounded-xl p-4 md:p-6 flex flex-col min-h-[350px] md:min-h-[500px]">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Histórico de Producción por Grupos</h3>
-            </div>
-            <div class="flex-1 w-full relative">
-                <canvas id="chart5"></canvas>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- SECCIÓN: KPIS -->
-    <div id="kpis" class="view-section hidden">
-        <div class="glass-card rounded-xl p-4 md:p-6 flex flex-col min-h-[350px] md:min-h-[500px]">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Porcentaje de Cumplimiento Diario (%)</h3>
-            </div>
-            <div class="flex-1 w-full relative">
-                <canvas id="chart6"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- SECCIÓN: GRÁFICO PERSONALIZADO -->
-    <div id="custom" class="view-section hidden">
-        <div class="glass-card rounded-xl p-4 md:p-6 flex flex-col min-h-[350px] md:min-h-[500px]">
-            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4">
-                <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">Creador de Gráficos Personalizados</h3>
-                
-                <div class="flex flex-wrap gap-3 w-full xl:w-auto">
-                    <select id="customType" class="bg-[#0F172A] border border-outline-variant rounded-lg py-2 px-3 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF]">
-                        <option value="bar">Barras</option>
-                        <option value="line">Líneas</option>
+            <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
+                <!-- Selector de Planillas -->
+                <div class="relative w-full md:w-auto">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">table_chart</span>
+                    <select id="planillaSelector"
+                        class="bg-[#1E293B] border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] w-full md:w-[250px] transition-all appearance-none cursor-pointer"
+                        onchange="changePlanilla()">
+                        <option value="default" style="color:#000;">Cargando planillas...</option>
                     </select>
-                    <select id="customX" class="bg-[#0F172A] border border-outline-variant rounded-lg py-2 px-3 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] flex-1 xl:flex-none">
-                        <option value="">Eje X (Base)</option>
+                </div>
+                <!-- Selector de meses -->
+                <div class="relative w-full md:w-auto">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">calendar_month</span>
+                    <select id="monthSelector"
+                        class="bg-[#1E293B] border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] w-full md:w-[200px] transition-all appearance-none cursor-pointer">
+                        <option value="all" style="color:#000;">Todos los meses</option>
                     </select>
-                    <select id="customY" class="bg-[#0F172A] border border-outline-variant rounded-lg py-2 px-3 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] flex-1 xl:flex-none">
-                        <option value="">Eje Y (Valores)</option>
-                    </select>
-                    <button onclick="generateCustomChart()" class="bg-[#2DD4BF] text-[#0F172A] font-bold rounded-lg py-2 px-4 hover:bg-[#3cddc7] transition-colors whitespace-nowrap">
-                        Generar
-                    </button>
                 </div>
             </div>
-            
-            <div class="flex-1 w-full relative flex items-center justify-center border-2 border-dashed border-outline-variant/30 rounded-lg min-h-[400px]">
-                <div id="custom-placeholder" class="text-on-surface-variant text-center p-4">
-                    <span class="material-symbols-outlined text-4xl mb-2 block">bar_chart</span>
-                    <p>Selecciona las variables arriba y presiona Generar</p>
+        </header>
+
+        <!-- Dashboard Canvas -->
+        <div class="p-4 md:p-8 space-y-6 max-w-[1600px] mx-auto w-full relative">
+
+            <!-- Loading Overlay -->
+            <div id="loading-overlay"
+                class="absolute inset-0 bg-[#0F172A] z-50 flex flex-col items-center justify-center pt-32 transition-opacity duration-500">
+                <div class="w-16 h-16 border-4 border-outline-variant border-t-primary rounded-full animate-spin mb-6">
                 </div>
-                <div id="customCanvasContainer" class="hidden absolute inset-0 p-6">
-                    <canvas id="customCanvas"></canvas>
+                <h2 class="text-2xl font-bold text-on-surface">Cargando datos en vivo...</h2>
+                <p class="text-on-surface-variant text-base mt-2">Conectando con Google Drive</p>
+            </div>
+
+            <!-- SECCIÓN: RESUMEN GENERAL -->
+            <div id="resumen" class="view-section block">
+                <!-- Top Row: 2 Columns -->
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+                    <!-- Chart 1: Cumplimiento del Turno en la venta -->
+                    <div class="glass-card rounded-xl p-6 flex flex-col min-h-[350px]">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3
+                                class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">
+                                Cumplimiento del Turno en la venta</h3>
+                        </div>
+                        <div class="flex-1 w-full relative">
+                            <canvas id="chart1"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 3: Cumplimiento del Turno en las horas efectivas -->
+                    <div class="glass-card rounded-xl p-6 flex flex-col min-h-[350px]">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3
+                                class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">
+                                Cumplimiento del Turno en las horas efectivas</h3>
+                        </div>
+                        <div class="flex-1 w-full relative">
+                            <canvas id="chart3"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Full Width -->
+                <div class="glass-card rounded-xl p-6 flex flex-col min-h-[400px]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">
+                            Venta Mensual</h3>
+                    </div>
+                    <div class="flex-1 w-full relative">
+                        <canvas id="chart2"></canvas>
+                    </div>
                 </div>
             </div>
+
+
+            <!-- SECCIÓN: EQUIPOS -->
+            <div id="equipos" class="view-section hidden">
+                <div class="glass-card rounded-xl p-4 md:p-6 flex flex-col min-h-[350px] md:min-h-[500px]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">
+                            Comparativa de Ventas: 3500 vs 3700</h3>
+                    </div>
+                    <div class="flex-1 w-full relative">
+                        <canvas id="chart4"></canvas>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- SECCIÓN: GRUPOS -->
+            <div id="grupos" class="view-section hidden">
+                <div class="glass-card rounded-xl p-4 md:p-6 flex flex-col min-h-[350px] md:min-h-[500px]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">
+                            Histórico de Producción por Grupos</h3>
+                    </div>
+                    <div class="flex-1 w-full relative">
+                        <canvas id="chart5"></canvas>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- SECCIÓN: KPIS -->
+            <div id="kpis" class="view-section hidden">
+                <div class="glass-card rounded-xl p-4 md:p-6 flex flex-col min-h-[350px] md:min-h-[500px]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">
+                            Porcentaje de Cumplimiento Diario (%)</h3>
+                    </div>
+                    <div class="flex-1 w-full relative">
+                        <canvas id="chart6"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: GRÁFICO PERSONALIZADO -->
+            <div id="custom" class="view-section hidden">
+                <div class="glass-card rounded-xl p-4 md:p-6 flex flex-col min-h-[350px] md:min-h-[500px]">
+                    <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4">
+                        <h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">
+                            Creador de Gráficos Personalizados</h3>
+
+                        <div class="flex flex-wrap gap-3 w-full xl:w-auto">
+                            <select id="customType"
+                                class="bg-[#0F172A] border border-outline-variant rounded-lg py-2 px-3 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF]">
+                                <option value="bar">Barras</option>
+                                <option value="line">Líneas</option>
+                            </select>
+                            <select id="customX"
+                                class="bg-[#0F172A] border border-outline-variant rounded-lg py-2 px-3 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] flex-1 xl:flex-none">
+                                <option value="">Eje X (Base)</option>
+                            </select>
+                            <select id="customY"
+                                class="bg-[#0F172A] border border-outline-variant rounded-lg py-2 px-3 text-body-sm text-on-surface focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF] flex-1 xl:flex-none">
+                                <option value="">Eje Y (Valores)</option>
+                            </select>
+                            <button onclick="generateCustomChart()"
+                                class="bg-[#2DD4BF] text-[#0F172A] font-bold rounded-lg py-2 px-4 hover:bg-[#3cddc7] transition-colors whitespace-nowrap">
+                                Generar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div
+                        class="flex-1 w-full relative flex items-center justify-center border-2 border-dashed border-outline-variant/30 rounded-lg min-h-[400px]">
+                        <div id="custom-placeholder" class="text-on-surface-variant text-center p-4">
+                            <span class="material-symbols-outlined text-4xl mb-2 block">bar_chart</span>
+                            <p>Selecciona las variables arriba y presiona Generar</p>
+                        </div>
+                        <div id="customCanvasContainer" class="hidden absolute inset-0 p-6">
+                            <canvas id="customCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
-    </div>
+    </main>
 
-</div>
-</main>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
 
-<script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('mobile-overlay');
-        
-        if (sidebar.classList.contains('-translate-x-full')) {
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
-        } else {
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
         }
-    }
 
-    // Variables globales para Chart.js
-    let charts = {};
-    let globalRawData = [];
+        // Variables globales para Chart.js
+        let charts = {};
+        let globalRawData = [];
 
-    let planillasList = [];
+        let planillasList = [];
 
-    async function loadPlanillas() {
-        try {
-            const res = await fetch('/api/planillas');
-            const json = await res.json();
-            planillasList = json.data || [];
+        async function loadPlanillas() {
+            try {
+                const res = await fetch('/api/planillas');
+                const json = await res.json();
+                planillasList = json.data || [];
+                const selector = document.getElementById('planillaSelector');
+                selector.innerHTML = '';
+                planillasList.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = p.nombre;
+                    opt.dataset.url = p.url;
+                    opt.style.color = '#000';
+                    selector.appendChild(opt);
+                });
+            } catch (e) {
+                console.error("Error loading planillas", e);
+            }
+        }
+
+        async function changePlanilla() {
             const selector = document.getElementById('planillaSelector');
-            selector.innerHTML = '';
-            planillasList.forEach(p => {
+            const selectedOption = selector.options[selector.selectedIndex];
+            if (!selectedOption) return;
+
+            const pid = selectedOption.value;
+            const url = selectedOption.dataset.url;
+
+            const overlay = document.getElementById('loading-overlay');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.style.opacity = '1', 10);
+
+            try {
+                const response = await fetch(`/api/data?planilla_id=${encodeURIComponent(pid)}&url=${encodeURIComponent(url)}`);
+                const result = await response.json();
+
+                if (result.error) throw new Error(result.error);
+
+                globalRawData = result.data;
+                document.getElementById('monthSelector').innerHTML = '<option value="all" style="color:#000;">Todos los meses</option>';
+                initMonthSelector();
+                initCustomSelectors();
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', 'No se pudo cargar esta planilla: ' + e.message, 'error');
+            } finally {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.display = 'none', 500);
+            }
+        }
+
+        // Lógica para cambiar de pestañas sin recargar
+        function switchTab(tabId, element) {
+            // Restaurar estado inactivo a todos los nav-items
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('nav-item-active', 'bg-[#1E293B]', 'text-[#2DD4BF]', 'font-bold');
+                el.classList.add('text-slate-400');
+            });
+
+            // Asignar estado activo al seleccionado
+            element.classList.remove('text-slate-400');
+            element.classList.add('nav-item-active', 'bg-[#1E293B]', 'text-[#2DD4BF]', 'font-bold');
+
+            // Ocultar todas las secciones
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.remove('block');
+                el.classList.add('hidden');
+            });
+            // Mostrar la elegida
+            const targetView = document.getElementById(tabId);
+            targetView.classList.remove('hidden');
+            targetView.classList.add('block');
+
+            // Actualizar el título de la página
+            const titles = {
+                'resumen': 'Resumen General',
+                'equipos': 'Ventas (3500 vs 3700)',
+                'grupos': 'Producción por Grupos',
+                'kpis': 'Cumplimiento (%)',
+                'custom': 'Crea tu Gráfico'
+            };
+            document.getElementById('page-title').innerText = titles[tabId];
+            document.title = titles[tabId] + " - VTA Analytics";
+
+            // Si estamos en móvil, cerramos el sidebar automáticamente al elegir
+            if (window.innerWidth < 768) {
+                toggleSidebar();
+            }
+
+            // Disparar evento de resize para que Chart.js redibuje correctamente el tamaño al aparecer
+            window.dispatchEvent(new Event('resize'));
+        }
+
+        function initMonthSelector() {
+            const selector = document.getElementById('monthSelector');
+            const months = new Set();
+            globalRawData.forEach(d => {
+                if (d['Dia'] && d['Dia'] !== 'Dia') {
+                    const parts = d['Dia'].split('-');
+                    if (parts.length > 1) {
+                        months.add(parts[1]);
+                    }
+                }
+            });
+
+            months.forEach(m => {
                 const opt = document.createElement('option');
-                opt.value = p.id;
-                opt.textContent = p.nombre;
-                opt.dataset.url = p.url;
+                opt.value = m;
+                opt.textContent = 'Mes: ' + m;
                 opt.style.color = '#000';
                 selector.appendChild(opt);
             });
-        } catch(e) {
-            console.error("Error loading planillas", e);
-        }
-    }
 
-    async function changePlanilla() {
-        const selector = document.getElementById('planillaSelector');
-        const selectedOption = selector.options[selector.selectedIndex];
-        if (!selectedOption) return;
-        
-        const pid = selectedOption.value;
-        const url = selectedOption.dataset.url;
-        
-        const overlay = document.getElementById('loading-overlay');
-        overlay.style.display = 'flex';
-        setTimeout(() => overlay.style.opacity = '1', 10);
-        
-        try {
-            const response = await fetch(`/api/data?planilla_id=${encodeURIComponent(pid)}&url=${encodeURIComponent(url)}`);
-            const result = await response.json();
-            
-            if (result.error) throw new Error(result.error);
-            
-            globalRawData = result.data;
-            document.getElementById('monthSelector').innerHTML = '<option value="all" style="color:#000;">Todos los meses</option>';
-            initMonthSelector();
-            initCustomSelectors();
-        } catch(e) {
-            console.error(e);
-            Swal.fire('Error', 'No se pudo cargar esta planilla: ' + e.message, 'error');
-        } finally {
-            overlay.style.opacity = '0';
-            setTimeout(() => overlay.style.display = 'none', 500);
-        }
-    }
-
-    async function showSettingsMessage() {
-        const { value: formValues } = await Swal.fire({
-            title: 'Agregar Planilla (Mes/Año)',
-            html:
-                '<p style="font-size:14px; margin-bottom:15px; color:#bacac5;">Aquí puedes guardar un nuevo link de Excel. Estará disponible para siempre en el selector de arriba.</p>' +
-                '<input id="swal-nombre" class="swal2-input" placeholder="Nombre (ej: Febrero 2024)">' +
-                '<input id="swal-url" class="swal2-input" placeholder="URL compartida del archivo (ej: Sharepoint)">',
-            focusConfirm: false,
-            background: '#1e293b',
-            color: '#f8fafc',
-            showCancelButton: true,
-            confirmButtonText: 'Guardar Planilla',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#2DD4BF',
-            preConfirm: () => {
-                return {
-                    nombre: document.getElementById('swal-nombre').value,
-                    url: document.getElementById('swal-url').value
-                }
-            }
-        });
-
-        if (formValues && formValues.nombre && formValues.url) {
-            Swal.fire({title: 'Guardando...', background: '#1e293b', color: '#f8fafc', didOpen: () => {Swal.showLoading()}});
-            try {
-                const res = await fetch('/api/planillas', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(formValues)
-                });
-                const data = await res.json();
-                if (data.success) {
-                    Swal.fire({title: '¡Éxito!', text: 'Planilla agregada.', icon: 'success', background: '#1e293b', color: '#f8fafc'});
-                    await loadPlanillas();
-                } else {
-                    Swal.fire({title: 'Error', text: data.error || 'No se pudo guardar', icon: 'error', background: '#1e293b', color: '#f8fafc'});
-                }
-            } catch(e) {
-                Swal.fire({title: 'Error', text: 'Fallo de red', icon: 'error', background: '#1e293b', color: '#f8fafc'});
-            }
-        }
-    }
-
-    // Lógica para cambiar de pestañas sin recargar
-    function switchTab(tabId, element) {
-        // Restaurar estado inactivo a todos los nav-items
-        document.querySelectorAll('.nav-item').forEach(el => {
-            el.classList.remove('nav-item-active', 'bg-[#1E293B]', 'text-[#2DD4BF]', 'font-bold');
-            el.classList.add('text-slate-400');
-        });
-        
-        // Asignar estado activo al seleccionado
-        element.classList.remove('text-slate-400');
-        element.classList.add('nav-item-active', 'bg-[#1E293B]', 'text-[#2DD4BF]', 'font-bold');
-        
-        // Ocultar todas las secciones
-        document.querySelectorAll('.view-section').forEach(el => {
-            el.classList.remove('block');
-            el.classList.add('hidden');
-        });
-        // Mostrar la elegida
-        const targetView = document.getElementById(tabId);
-        targetView.classList.remove('hidden');
-        targetView.classList.add('block');
-
-        // Actualizar el título de la página
-        const titles = {
-            'resumen': 'Resumen General',
-            'equipos': 'Ventas (3500 vs 3700)',
-            'grupos': 'Producción por Grupos',
-            'kpis': 'Cumplimiento (%)',
-            'custom': 'Crea tu Gráfico'
-        };
-        document.getElementById('page-title').innerText = titles[tabId];
-        document.title = titles[tabId] + " - VTA Analytics";
-
-        // Si estamos en móvil, cerramos el sidebar automáticamente al elegir
-        if (window.innerWidth < 768) {
-            toggleSidebar();
-        }
-
-        // Disparar evento de resize para que Chart.js redibuje correctamente el tamaño al aparecer
-        window.dispatchEvent(new Event('resize'));
-    }
-
-    function initMonthSelector() {
-        const selector = document.getElementById('monthSelector');
-        const months = new Set();
-        globalRawData.forEach(d => {
-            if (d['Dia'] && d['Dia'] !== 'Dia') {
-                const parts = d['Dia'].split('-');
-                if (parts.length > 1) {
-                    months.add(parts[1]);
-                }
-            }
-        });
-        
-        months.forEach(m => {
-            const opt = document.createElement('option');
-            opt.value = m;
-            opt.textContent = 'Mes: ' + m;
-            opt.style.color = '#000';
-            selector.appendChild(opt);
-        });
-
-        selector.addEventListener('change', function() {
-            renderCharts(this.value);
-        });
-        
-        // Auto-seleccionar el último mes disponible por defecto si hay meses
-        const monthsArr = Array.from(months);
-        if (monthsArr.length > 0) {
-            selector.value = monthsArr[monthsArr.length - 1];
-        }
-        
-        renderCharts(selector.value);
-    }
-
-    function renderCharts(selectedMonth) {
-        let filteredData = globalRawData;
-        if (selectedMonth && selectedMonth !== 'all') {
-            filteredData = globalRawData.filter(d => d['Dia'] && d['Dia'].includes('-' + selectedMonth));
-        }
-
-        // Destruir gráficos anteriores si existen
-        Object.keys(charts).forEach(key => {
-            if (key !== 'custom') charts[key].destroy();
-        });
-
-        const timeToDecimal = (timeStr) => {
-            if (!timeStr || typeof timeStr !== 'string') return 0;
-            const parts = timeStr.split(':');
-            if (parts.length >= 2) {
-                return parseInt(parts[0]) + parseInt(parts[1])/60;
-            }
-            return 0;
-        };
-
-        // Filtrar filas vacías del final (días futuros sin datos)
-        let lastValidIndex = filteredData.length - 1;
-        for (let i = filteredData.length - 1; i >= 0; i--) {
-            const row = filteredData[i];
-            const venta = parseFloat(row['Venta Real T°']) || 0;
-            const hefect = row['H. efect. 3500'];
-            if (venta > 0 || (hefect && hefect !== "00:00:00" && hefect !== "NaN" && hefect !== null)) {
-                // Si el turno A tiene datos, asegurarnos de incluir también el turno B (i+1) si pertenece al mismo día
-                lastValidIndex = (i % 2 === 0 && i + 1 < filteredData.length) ? i + 1 : i;
-                break;
-            }
-        }
-        
-        const validData = filteredData.slice(0, lastValidIndex + 1);
-        
-        // Extraer últimos 4 turnos (últimos 2 días) para los gráficos 1 y 3
-        const recentData = validData.slice(-4); 
-        const labelsTurnos = recentData.map(d => `${d['Dia']} ${d['T°'] || ''}`);
-        
-        const ventaReal = recentData.map(d => parseFloat(d['Venta Real T°']) || 0);
-        const ventProg = recentData.map(d => parseFloat(d['Vent Prog. T°']) || 0);
-        const cumplVenta = recentData.map(d => (parseFloat(d['% Cumpl. T° $']) || 0) * 100); 
-
-        const hEfect3500 = recentData.map(d => timeToDecimal(d['H. efect. 3500']));
-        const hEfect3700 = recentData.map(d => timeToDecimal(d['H. efect. 3700']));
-        const cumplHE = recentData.map(d => (parseFloat(d['% Cumpl. HE T°']) || 0) * 100);
-
-        const dailyData = validData.filter(d => d['Vent total Real'] !== null && d['Vent total Real'] !== undefined && d['Vent total Real'] !== "NaN");
-        const labelsMensual = dailyData.map(d => d['Dia']);
-        const ventTotalReal = dailyData.map(d => parseFloat(d['Vent total Real']) || 0);
-        const progParcial = dailyData.map(d => parseFloat(d['Prog. Parcial']) || 0);
-        const realAcumulado = dailyData.map(d => parseFloat(d['Real acumulado']) || 0);
-        const progAcum = dailyData.map(d => parseFloat(d['Prog. Acum.']) || 0);
-
-        const vent3500 = recentData.map(d => parseFloat(d['Vent. 3500']) || 0);
-        const vent3700 = recentData.map(d => parseFloat(d['Vent. 3700']) || 0);
-
-        const cumplMensual = dailyData.map(d => (parseFloat(d['% cumplimeinto']) || 0) * 100);
-
-        // Buscar dinámicamente columnas de Grupos (G1, G2, G3...)
-        const groupColumns = Object.keys(globalRawData[0] || {}).filter(k => /^G\d+$/.test(k));
-        const groupDatasets = [];
-        const groupColors = ['#57f1db', '#ffafd3', '#7bd0ff', '#ffb4ab', '#2dd4bf', '#5ec9ff']; 
-        
-        groupColumns.forEach((col, index) => {
-            const dataArr = dailyData.map(d => parseFloat(d[col]) || 0);
-            const colorHex = groupColors[index % groupColors.length];
-            groupDatasets.push({
-                label: `Grupo ${col.replace('G', '')} (${col})`,
-                data: dataArr,
-                borderColor: colorHex,
-                backgroundColor: colorHex + '33', // 20% opacity
-                fill: true,
-                tension: 0.3
+            selector.addEventListener('change', function () {
+                renderCharts(this.value);
             });
-        });
 
-        Chart.defaults.font.family = "'Hanken Grotesk', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
-        Chart.defaults.color = '#bacac5'; // on-surface-variant
-
-        const gridColor = 'rgba(255, 255, 255, 0.05)';
-
-        charts['chart1'] = new Chart(document.getElementById('chart1'), {
-            type: 'bar',
-            data: {
-                labels: labelsTurnos,
-                datasets: [
-                    { label: '% Cumpl. T° $', type: 'line', data: cumplVenta, borderColor: '#57f1db', borderWidth: 2, tension: 0.1, yAxisID: 'y1' },
-                    { label: 'Venta Real T°', data: ventaReal, backgroundColor: '#ffb4ab', borderRadius: 4, yAxisID: 'y' },
-                    { label: 'Vent Prog. T°', data: ventProg, backgroundColor: '#2dd4bf', borderRadius: 4, yAxisID: 'y' }
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                scales: {
-                    x: { grid: { color: gridColor } },
-                    y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: {display: true, text: 'MILLONES'} },
-                    y1: { type: 'linear', display: true, position: 'right', grid: {drawOnChartArea: false}, ticks: {callback: function(v){ return v + '%'}} }
-                }
+            // Auto-seleccionar el último mes disponible por defecto si hay meses
+            const monthsArr = Array.from(months);
+            if (monthsArr.length > 0) {
+                selector.value = monthsArr[monthsArr.length - 1];
             }
-        });
 
-        charts['chart3'] = new Chart(document.getElementById('chart3'), {
-            type: 'bar',
-            data: {
-                labels: labelsTurnos,
-                datasets: [
-                    { label: '% Cumpl. HE T°', type: 'line', data: cumplHE, borderColor: '#ffb4ab', borderWidth: 2, tension: 0.1, yAxisID: 'y1' },
-                    { label: 'H. efect. 3500', data: hEfect3500, backgroundColor: '#00574d', borderRadius: 4, yAxisID: 'y' },
-                    { label: 'H. efect. 3700', data: hEfect3700, backgroundColor: '#ffafd3', borderRadius: 4, yAxisID: 'y' }
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                scales: {
-                    x: { grid: { color: gridColor } },
-                    y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: {display: true, text: 'HORAS (Decimal)'} },
-                    y1: { type: 'linear', display: true, position: 'right', grid: {drawOnChartArea: false}, ticks: {callback: function(v){ return v + '%'}} }
-                }
-            }
-        });
-
-        charts['chart2'] = new Chart(document.getElementById('chart2'), {
-            type: 'bar',
-            data: {
-                labels: labelsMensual,
-                datasets: [
-                    { label: 'Prog. Acum.', type: 'line', data: progAcum, borderColor: '#57f1db', borderWidth: 2, tension: 0.1, yAxisID: 'y1' },
-                    { label: 'Real acumulado', type: 'line', data: realAcumulado, borderColor: '#ffb4ab', borderWidth: 2, tension: 0.1, yAxisID: 'y1' },
-                    { label: 'Vent total Real', data: ventTotalReal, backgroundColor: 'rgba(255, 180, 171, 0.4)', borderColor: '#ffb4ab', borderWidth: 1, yAxisID: 'y' },
-                    { label: 'Prog. Parcial', data: progParcial, backgroundColor: '#2dd4bf', yAxisID: 'y' }
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                scales: {
-                    x: { grid: { color: gridColor } },
-                    y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: {display: true, text: 'MILLONES'} },
-                    y1: { type: 'linear', display: true, position: 'right', grid: {drawOnChartArea: false}, title: {display: true, text: 'MILLONES (Acumulado)'} }
-                }
-            }
-        });
-
-        // Gráfico 4: Equipos (Barras agrupadas)
-        charts['chart4'] = new Chart(document.getElementById('chart4'), {
-            type: 'bar',
-            data: {
-                labels: labelsTurnos,
-                datasets: [
-                    { label: 'Vent. 3500', data: vent3500, backgroundColor: '#2dd4bf', borderRadius: 4 },
-                    { label: 'Vent. 3700', data: vent3700, backgroundColor: '#ffb4ab', borderRadius: 4 }
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                scales: {
-                    x: { grid: { color: gridColor } },
-                    y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: {display: true, text: 'MILLONES'} }
-                }
-            }
-        });
-
-        // Gráfico 5: Grupos (Áreas)
-        charts['chart5'] = new Chart(document.getElementById('chart5'), {
-            type: 'line',
-            data: {
-                labels: labelsMensual,
-                datasets: groupDatasets
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                scales: {
-                    x: { grid: { color: gridColor } },
-                    y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: {display: true, text: 'VOLUMEN (G1 / G2)'} }
-                }
-            }
-        });
-
-        // Gráfico 6: KPIs Cumplimiento
-        charts['chart6'] = new Chart(document.getElementById('chart6'), {
-            type: 'line',
-            data: {
-                labels: labelsMensual,
-                datasets: [
-                    { label: '% Cumplimiento Mensual', data: cumplMensual, borderColor: '#3cddc7', borderWidth: 3, pointBackgroundColor: '#3cddc7', pointRadius: 4, tension: 0.1 }
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                scales: {
-                    x: { grid: { color: gridColor } },
-                    y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: {display: true, text: 'PORCENTAJE (%)'}, ticks: {callback: function(v){ return v + '%'}} }
-                }
-            }
-        });
-
-        if (charts['custom']) {
-            generateCustomChart();
+            renderCharts(selector.value);
         }
-    }
 
-    function initCustomSelectors() {
-        if (!globalRawData || globalRawData.length === 0) return;
-        const columns = Object.keys(globalRawData[0]).filter(k => k !== 'Dia' && k !== 'T°' && !k.startsWith('Unnamed'));
-        columns.unshift('T°');
-        columns.unshift('Dia');
-        
-        const categoricalCols = [];
-        const numericalCols = [];
+        function renderCharts(selectedMonth) {
+            let filteredData = globalRawData;
+            if (selectedMonth && selectedMonth !== 'all') {
+                filteredData = globalRawData.filter(d => d['Dia'] && d['Dia'].includes('-' + selectedMonth));
+            }
 
-        columns.forEach(col => {
-            let isNum = false;
-            for(let i = 0; i < Math.min(globalRawData.length, 30); i++) {
-                let val = globalRawData[i][col];
-                if (val !== null && val !== 'NaN' && val !== undefined && val !== '') {
-                    if (typeof val === 'number') { isNum = true; break; }
-                    if (typeof val === 'string') {
-                        // Check if it's a time like HH:MM:SS
-                        if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(val)) { isNum = true; break; }
-                        // Check if it's a float, ignoring dates like "29-Jul"
-                        if (!isNaN(parseFloat(val)) && isFinite(val) && !/^[0-9]{2}-[a-zA-Z]{3}$/.test(val)) { isNum = true; break; }
+            // Destruir gráficos anteriores si existen
+            Object.keys(charts).forEach(key => {
+                if (key !== 'custom') charts[key].destroy();
+            });
+
+            const timeToDecimal = (timeStr) => {
+                if (!timeStr || typeof timeStr !== 'string') return 0;
+                const parts = timeStr.split(':');
+                if (parts.length >= 2) {
+                    return parseInt(parts[0]) + parseInt(parts[1]) / 60;
+                }
+                return 0;
+            };
+
+            // Filtrar filas vacías del final (días futuros sin datos)
+            let lastValidIndex = filteredData.length - 1;
+            for (let i = filteredData.length - 1; i >= 0; i--) {
+                const row = filteredData[i];
+                const venta = parseFloat(row['Venta Real T°']) || 0;
+                const hefect = row['H. efect. 3500'];
+                if (venta > 0 || (hefect && hefect !== "00:00:00" && hefect !== "NaN" && hefect !== null)) {
+                    // Si el turno A tiene datos, asegurarnos de incluir también el turno B (i+1) si pertenece al mismo día
+                    lastValidIndex = (i % 2 === 0 && i + 1 < filteredData.length) ? i + 1 : i;
+                    break;
+                }
+            }
+
+            const validData = filteredData.slice(0, lastValidIndex + 1);
+
+            // Extraer últimos 4 turnos (últimos 2 días) para los gráficos 1 y 3
+            const recentData = validData.slice(-4);
+            const labelsTurnos = recentData.map(d => `${d['Dia']} ${d['T°'] || ''}`);
+
+            const ventaReal = recentData.map(d => parseFloat(d['Venta Real T°']) || 0);
+            const ventProg = recentData.map(d => parseFloat(d['Vent Prog. T°']) || 0);
+            const cumplVenta = recentData.map(d => (parseFloat(d['% Cumpl. T° $']) || 0) * 100);
+
+            const hEfect3500 = recentData.map(d => timeToDecimal(d['H. efect. 3500']));
+            const hEfect3700 = recentData.map(d => timeToDecimal(d['H. efect. 3700']));
+            const cumplHE = recentData.map(d => (parseFloat(d['% Cumpl. HE T°']) || 0) * 100);
+
+            const dailyData = validData.filter(d => d['Vent total Real'] !== null && d['Vent total Real'] !== undefined && d['Vent total Real'] !== "NaN");
+            const labelsMensual = dailyData.map(d => d['Dia']);
+            const ventTotalReal = dailyData.map(d => parseFloat(d['Vent total Real']) || 0);
+            const progParcial = dailyData.map(d => parseFloat(d['Prog. Parcial']) || 0);
+            const realAcumulado = dailyData.map(d => parseFloat(d['Real acumulado']) || 0);
+            const progAcum = dailyData.map(d => parseFloat(d['Prog. Acum.']) || 0);
+
+            const vent3500 = recentData.map(d => parseFloat(d['Vent. 3500']) || 0);
+            const vent3700 = recentData.map(d => parseFloat(d['Vent. 3700']) || 0);
+
+            const cumplMensual = dailyData.map(d => (parseFloat(d['% cumplimeinto']) || 0) * 100);
+
+            // Buscar dinámicamente columnas de Grupos (G1, G2, G3...)
+            const groupColumns = Object.keys(globalRawData[0] || {}).filter(k => /^G\d+$/.test(k));
+            const groupDatasets = [];
+            const groupColors = ['#57f1db', '#ffafd3', '#7bd0ff', '#ffb4ab', '#2dd4bf', '#5ec9ff'];
+
+            groupColumns.forEach((col, index) => {
+                const dataArr = dailyData.map(d => parseFloat(d[col]) || 0);
+                const colorHex = groupColors[index % groupColors.length];
+                groupDatasets.push({
+                    label: `Grupo ${col.replace('G', '')} (${col})`,
+                    data: dataArr,
+                    borderColor: colorHex,
+                    backgroundColor: colorHex + '33', // 20% opacity
+                    fill: true,
+                    tension: 0.3
+                });
+            });
+
+            Chart.defaults.font.family = "'Hanken Grotesk', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
+            Chart.defaults.color = '#bacac5'; // on-surface-variant
+
+            const gridColor = 'rgba(255, 255, 255, 0.05)';
+
+            charts['chart1'] = new Chart(document.getElementById('chart1'), {
+                type: 'bar',
+                data: {
+                    labels: labelsTurnos,
+                    datasets: [
+                        { label: '% Cumpl. T° $', type: 'line', data: cumplVenta, borderColor: '#57f1db', borderWidth: 2, tension: 0.1, yAxisID: 'y1' },
+                        { label: 'Venta Real T°', data: ventaReal, backgroundColor: '#ffb4ab', borderRadius: 4, yAxisID: 'y' },
+                        { label: 'Vent Prog. T°', data: ventProg, backgroundColor: '#2dd4bf', borderRadius: 4, yAxisID: 'y' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { grid: { color: gridColor } },
+                        y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: { display: true, text: 'MILLONES' } },
+                        y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function (v) { return v + '%' } } }
                     }
                 }
+            });
+
+            charts['chart3'] = new Chart(document.getElementById('chart3'), {
+                type: 'bar',
+                data: {
+                    labels: labelsTurnos,
+                    datasets: [
+                        { label: '% Cumpl. HE T°', type: 'line', data: cumplHE, borderColor: '#ffb4ab', borderWidth: 2, tension: 0.1, yAxisID: 'y1' },
+                        { label: 'H. efect. 3500', data: hEfect3500, backgroundColor: '#00574d', borderRadius: 4, yAxisID: 'y' },
+                        { label: 'H. efect. 3700', data: hEfect3700, backgroundColor: '#ffafd3', borderRadius: 4, yAxisID: 'y' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { grid: { color: gridColor } },
+                        y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: { display: true, text: 'HORAS (Decimal)' } },
+                        y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function (v) { return v + '%' } } }
+                    }
+                }
+            });
+
+            charts['chart2'] = new Chart(document.getElementById('chart2'), {
+                type: 'bar',
+                data: {
+                    labels: labelsMensual,
+                    datasets: [
+                        { label: 'Prog. Acum.', type: 'line', data: progAcum, borderColor: '#57f1db', borderWidth: 2, tension: 0.1, yAxisID: 'y1' },
+                        { label: 'Real acumulado', type: 'line', data: realAcumulado, borderColor: '#ffb4ab', borderWidth: 2, tension: 0.1, yAxisID: 'y1' },
+                        { label: 'Vent total Real', data: ventTotalReal, backgroundColor: 'rgba(255, 180, 171, 0.4)', borderColor: '#ffb4ab', borderWidth: 1, yAxisID: 'y' },
+                        { label: 'Prog. Parcial', data: progParcial, backgroundColor: '#2dd4bf', yAxisID: 'y' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { grid: { color: gridColor } },
+                        y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: { display: true, text: 'MILLONES' } },
+                        y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'MILLONES (Acumulado)' } }
+                    }
+                }
+            });
+
+            // Gráfico 4: Equipos (Barras agrupadas)
+            charts['chart4'] = new Chart(document.getElementById('chart4'), {
+                type: 'bar',
+                data: {
+                    labels: labelsTurnos,
+                    datasets: [
+                        { label: 'Vent. 3500', data: vent3500, backgroundColor: '#2dd4bf', borderRadius: 4 },
+                        { label: 'Vent. 3700', data: vent3700, backgroundColor: '#ffb4ab', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { grid: { color: gridColor } },
+                        y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: { display: true, text: 'MILLONES' } }
+                    }
+                }
+            });
+
+            // Gráfico 5: Grupos (Áreas)
+            charts['chart5'] = new Chart(document.getElementById('chart5'), {
+                type: 'line',
+                data: {
+                    labels: labelsMensual,
+                    datasets: groupDatasets
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { grid: { color: gridColor } },
+                        y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: { display: true, text: 'VOLUMEN (G1 / G2)' } }
+                    }
+                }
+            });
+
+            // Gráfico 6: KPIs Cumplimiento
+            charts['chart6'] = new Chart(document.getElementById('chart6'), {
+                type: 'line',
+                data: {
+                    labels: labelsMensual,
+                    datasets: [
+                        { label: '% Cumplimiento Mensual', data: cumplMensual, borderColor: '#3cddc7', borderWidth: 3, pointBackgroundColor: '#3cddc7', pointRadius: 4, tension: 0.1 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { grid: { color: gridColor } },
+                        y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor }, title: { display: true, text: 'PORCENTAJE (%)' }, ticks: { callback: function (v) { return v + '%' } } }
+                    }
+                }
+            });
+
+            if (charts['custom']) {
+                generateCustomChart();
             }
-            if (isNum) numericalCols.push(col);
-            else categoricalCols.push(col);
-        });
-        
-        const selX = document.getElementById('customX');
-        const selY = document.getElementById('customY');
-        
-        categoricalCols.forEach(col => {
-            const optX = document.createElement('option');
-            optX.value = col; optX.textContent = col; selX.appendChild(optX);
-        });
-
-        numericalCols.forEach(col => {
-            const optY = document.createElement('option');
-            optY.value = col; optY.textContent = col; selY.appendChild(optY);
-        });
-    }
-
-    function generateCustomChart() {
-        const type = document.getElementById('customType').value;
-        const colX = document.getElementById('customX').value;
-        const colY = document.getElementById('customY').value;
-        
-        if (!colX || !colY) return;
-
-        const selectedMonth = document.getElementById('monthSelector').value;
-        let filteredData = globalRawData;
-        if (selectedMonth && selectedMonth !== 'all') {
-            filteredData = globalRawData.filter(d => d['Dia'] && d['Dia'].includes('-' + selectedMonth));
         }
-        
-        const data = filteredData.filter(d => d[colX] !== null && d[colY] !== null && d[colY] !== 'NaN');
 
-        const labels = data.map(d => {
-            if (colX === 'Dia' && d['T°']) return `${d['Dia']} ${d['T°']}`;
-            return d[colX];
-        });
-        
-        const values = data.map(d => {
-            let val = d[colY];
-            if (typeof val === 'string' && val.includes(':')) {
-                const p = val.split(':');
-                if (p.length >= 2) return parseInt(p[0]) + parseInt(p[1])/60;
-            }
-            return parseFloat(val) || 0;
-        });
+        function initCustomSelectors() {
+            if (!globalRawData || globalRawData.length === 0) return;
+            const columns = Object.keys(globalRawData[0]).filter(k => k !== 'Dia' && k !== 'T°' && !k.startsWith('Unnamed'));
+            columns.unshift('T°');
+            columns.unshift('Dia');
 
-        document.getElementById('custom-placeholder').classList.add('hidden');
-        document.getElementById('customCanvasContainer').classList.remove('hidden');
+            const categoricalCols = [];
+            const numericalCols = [];
 
-        if (charts['custom']) charts['custom'].destroy();
+            columns.forEach(col => {
+                let isNum = false;
+                for (let i = 0; i < Math.min(globalRawData.length, 30); i++) {
+                    let val = globalRawData[i][col];
+                    if (val !== null && val !== 'NaN' && val !== undefined && val !== '') {
+                        if (typeof val === 'number') { isNum = true; break; }
+                        if (typeof val === 'string') {
+                            // Check if it's a time like HH:MM:SS
+                            if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(val)) { isNum = true; break; }
+                            // Check if it's a float, ignoring dates like "29-Jul"
+                            if (!isNaN(parseFloat(val)) && isFinite(val) && !/^[0-9]{2}-[a-zA-Z]{3}$/.test(val)) { isNum = true; break; }
+                        }
+                    }
+                }
+                if (isNum) numericalCols.push(col);
+                else categoricalCols.push(col);
+            });
 
-        const gridColor = 'rgba(255, 255, 255, 0.05)';
-        charts['custom'] = new Chart(document.getElementById('customCanvas'), {
-            type: type,
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: colY, data: values,
-                    backgroundColor: type === 'bar' ? '#57f1db' : 'rgba(87, 241, 219, 0.2)',
-                    borderColor: '#57f1db', borderWidth: 2, borderRadius: type === 'bar' ? 4 : 0, fill: type === 'line', tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                scales: { x: { grid: { color: gridColor } }, y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor } } }
-            }
-        });
-    }
+            const selX = document.getElementById('customX');
+            const selY = document.getElementById('customY');
 
-    document.addEventListener("DOMContentLoaded", async function() {
-        try {
-            const response = await fetch('/api/data');
-            const result = await response.json();
-            
-            if (result.error) {
-                console.error("Error from API:", result.error);
-                document.getElementById('loading-overlay').innerHTML = `<div class="text-error text-center"><span class="material-symbols-outlined text-4xl mb-2">error</span><h2 class="text-xl font-bold">Error al cargar datos</h2><p>${result.error}</p></div>`;
-                return;
-            }
-            
-            globalRawData = result.data;
-            if (!globalRawData || globalRawData.length === 0) {
-                document.getElementById('loading-overlay').innerHTML = `<div class="text-on-surface text-center"><h2 class="text-xl font-bold">Sin datos</h2><p>No se encontraron datos en el Excel.</p></div>`;
-                return;
-            }
-            
-            // Inicializa selectores y gráficos
-            await loadPlanillas();
-            
-            // Re-fijar la URL y el ID original en base a lo que se descargó al principio
-            if (planillasList.length > 0) {
-                const selector = document.getElementById('planillaSelector');
-                selector.value = planillasList[0].id;
-            }
-            
-            initMonthSelector();
-            initCustomSelectors();
-            
-            // Ocultar pantalla de carga
-            const overlay = document.getElementById('loading-overlay');
-            overlay.style.opacity = '0';
-            setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 500);
+            categoricalCols.forEach(col => {
+                const optX = document.createElement('option');
+                optX.value = col; optX.textContent = col; selX.appendChild(optX);
+            });
 
-        } catch (error) {
-            console.error("Fetch error:", error);
-            document.getElementById('loading-overlay').innerHTML = `<div class="text-error text-center"><span class="material-symbols-outlined text-5xl mb-2">wifi_off</span><h2 class="text-xl font-bold">Error de red</h2><p>No se pudo conectar con el servidor.</p></div>`;
+            numericalCols.forEach(col => {
+                const optY = document.createElement('option');
+                optY.value = col; optY.textContent = col; selY.appendChild(optY);
+            });
         }
-    });
-</script>
-</body></html>
+
+        function generateCustomChart() {
+            const type = document.getElementById('customType').value;
+            const colX = document.getElementById('customX').value;
+            const colY = document.getElementById('customY').value;
+
+            if (!colX || !colY) return;
+
+            const selectedMonth = document.getElementById('monthSelector').value;
+            let filteredData = globalRawData;
+            if (selectedMonth && selectedMonth !== 'all') {
+                filteredData = globalRawData.filter(d => d['Dia'] && d['Dia'].includes('-' + selectedMonth));
+            }
+
+            const data = filteredData.filter(d => d[colX] !== null && d[colY] !== null && d[colY] !== 'NaN');
+
+            const labels = data.map(d => {
+                if (colX === 'Dia' && d['T°']) return `${d['Dia']} ${d['T°']}`;
+                return d[colX];
+            });
+
+            const values = data.map(d => {
+                let val = d[colY];
+                if (typeof val === 'string' && val.includes(':')) {
+                    const p = val.split(':');
+                    if (p.length >= 2) return parseInt(p[0]) + parseInt(p[1]) / 60;
+                }
+                return parseFloat(val) || 0;
+            });
+
+            document.getElementById('custom-placeholder').classList.add('hidden');
+            document.getElementById('customCanvasContainer').classList.remove('hidden');
+
+            if (charts['custom']) charts['custom'].destroy();
+
+            const gridColor = 'rgba(255, 255, 255, 0.05)';
+            charts['custom'] = new Chart(document.getElementById('customCanvas'), {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: colY, data: values,
+                        backgroundColor: type === 'bar' ? '#57f1db' : 'rgba(87, 241, 219, 0.2)',
+                        borderColor: '#57f1db', borderWidth: 2, borderRadius: type === 'bar' ? 4 : 0, fill: type === 'line', tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { x: { grid: { color: gridColor } }, y: { type: 'linear', display: true, position: 'left', grid: { color: gridColor } } }
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            try {
+                const response = await fetch('/api/data');
+                const result = await response.json();
+
+                if (result.error) {
+                    console.error("Error from API:", result.error);
+                    document.getElementById('loading-overlay').innerHTML = `<div class="text-error text-center"><span class="material-symbols-outlined text-4xl mb-2">error</span><h2 class="text-xl font-bold">Error al cargar datos</h2><p>${result.error}</p></div>`;
+                    return;
+                }
+
+                globalRawData = result.data;
+                if (!globalRawData || globalRawData.length === 0) {
+                    document.getElementById('loading-overlay').innerHTML = `<div class="text-on-surface text-center"><h2 class="text-xl font-bold">Sin datos</h2><p>No se encontraron datos en el Excel.</p></div>`;
+                    return;
+                }
+
+                // Inicializa selectores y gráficos
+                await loadPlanillas();
+
+                // Re-fijar la URL y el ID original en base a lo que se descargó al principio
+                if (planillasList.length > 0) {
+                    const selector = document.getElementById('planillaSelector');
+                    selector.value = planillasList[0].id;
+                }
+
+                initMonthSelector();
+                initCustomSelectors();
+
+                // Ocultar pantalla de carga
+                const overlay = document.getElementById('loading-overlay');
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 500);
+
+            } catch (error) {
+                console.error("Fetch error:", error);
+                document.getElementById('loading-overlay').innerHTML = `<div class="text-error text-center"><span class="material-symbols-outlined text-5xl mb-2">wifi_off</span><h2 class="text-xl font-bold">Error de red</h2><p>No se pudo conectar con el servidor.</p></div>`;
+            }
+        });
+    </script>
+</body>
+
+</html>

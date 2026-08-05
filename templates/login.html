@@ -71,9 +71,9 @@
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#859490]">lock</span>
                     <input type="password" id="password" name="password" required placeholder="••••••••" 
-                           class="input-field w-full rounded-lg py-2.5 pl-10 pr-10 transition-all">
-                    <button type="button" onclick="togglePassword('password', 'eye-icon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#859490] hover:text-white focus:outline-none flex items-center justify-center">
-                        <span id="eye-icon" class="material-symbols-outlined text-xl">visibility</span>
+                           class="input-field w-full rounded-lg py-2.5 pl-10 pr-20 transition-all">
+                    <button type="button" onclick="togglePassword('password', 'eye-icon')" class="absolute right-3 top-1/2 -translate-y-1/2 focus:outline-none flex items-center justify-center">
+                        <span id="eye-icon" class="text-xs font-bold text-[#2DD4BF] hover:text-[#57f1db] transition-colors tracking-wide uppercase">Mostrar</span>
                     </button>
                 </div>
             </div>
@@ -91,10 +91,10 @@
             const icon = document.getElementById(iconId);
             if (input.type === "password") {
                 input.type = "text";
-                icon.textContent = "visibility_off";
+                icon.textContent = "OCULTAR";
             } else {
                 input.type = "password";
-                icon.textContent = "visibility";
+                icon.textContent = "MOSTRAR";
             }
         }
     </script>

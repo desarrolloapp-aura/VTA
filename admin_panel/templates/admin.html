@@ -90,10 +90,6 @@
                         <label class="block text-slate-400 text-sm font-semibold mb-2">Correo Electrónico</label>
                         <input type="email" id="reg-email" required class="w-full bg-[#0F172A] border border-slate-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF]">
                     </div>
-                    <div>
-                        <label class="block text-slate-400 text-sm font-semibold mb-2">Contraseña (Mínimo 6)</label>
-                        <input type="password" id="reg-pwd" required minlength="6" class="w-full bg-[#0F172A] border border-slate-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-[#2DD4BF] focus:ring-1 focus:ring-[#2DD4BF]">
-                    </div>
                     <button type="submit" id="btn-submit" class="w-full bg-[#2DD4BF] hover:bg-[#57f1db] text-[#003731] font-bold py-3 px-4 rounded-lg transition-colors">
                         Crear Cuenta
                     </button>
@@ -163,7 +159,6 @@
         async function createUser(e) {
             e.preventDefault();
             const email = document.getElementById('reg-email').value;
-            const pwd = document.getElementById('reg-pwd').value;
             const btn = document.getElementById('btn-submit');
             
             btn.disabled = true;
@@ -173,7 +168,7 @@
                 const res = await fetch('/api/users', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({email, password: pwd})
+                    body: JSON.stringify({email})
                 });
                 const data = await res.json();
 

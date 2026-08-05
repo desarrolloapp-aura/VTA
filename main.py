@@ -9,6 +9,7 @@ import threading
 import io
 import urllib.request
 import asyncio
+import httpx
 from supabase import create_client, Client
 
 app = FastAPI(title="Dashboard VTA")
@@ -157,7 +158,13 @@ async def login_post(request: Request, email: str = Form(...), password: str = F
         response = supabase.auth.sign_in_with_password({"email": email, "password": password})
         token = response.session.access_token
         
-        redirect = RedirectResponse(url="/", status_code=303)
+        must_change = response.user.user_metadata.get("must_change_password", False)
+        
+        if must_change:
+            redirect = RedirectResponse(url="/change-password", status_code=303)
+        else:
+            redirect = RedirectResponse(url="/", status_code=303)
+            
         redirect.set_cookie(key="access_token", value=token, httponly=True, max_age=3600*24)
         return redirect
     except Exception as e:
@@ -178,7 +185,44 @@ async def get_dashboard(request: Request):
     if not user:
         return RedirectResponse(url="/login", status_code=303)
         
+    if user.user.user_metadata.get("must_change_password"):
+        return RedirectResponse(url="/change-password", status_code=303)
+        
     return templates.TemplateResponse(request=request, name="dashboard.html")
+
+@app.get("/change-password", response_class=HTMLResponse)
+async def change_password_page(request: Request):
+    user = verify_session(request)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    return templates.TemplateResponse(request=request, name="change_password.html")
+
+@app.post("/change-password")
+async def change_password_post(request: Request, new_password: str = Form(...), confirm_password: str = Form(...)):
+    user = verify_session(request)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+        
+    if len(new_password) < 6:
+        return templates.TemplateResponse(request=request, name="change_password.html", context={"error": "La contraseña debe tener al menos 6 caracteres."})
+        
+    if new_password != confirm_password:
+        return templates.TemplateResponse(request=request, name="change_password.html", context={"error": "Las contraseñas no coinciden."})
+        
+    try:
+        token = request.cookies.get("access_token")
+        with httpx.Client() as client:
+            r = client.put(
+                f"{SUPABASE_URL}/auth/v1/user",
+                headers={"Authorization": f"Bearer {token}", "apikey": SUPABASE_KEY},
+                json={"password": new_password, "data": {"must_change_password": False}}
+            )
+            if r.status_code >= 400:
+                raise Exception("Error al actualizar la contraseña en Supabase")
+                
+        return RedirectResponse(url="/", status_code=303)
+    except Exception as e:
+        return templates.TemplateResponse(request=request, name="change_password.html", context={"error": str(e)})
 
 # Cambiamos async def por def normal para que FastAPI lo ejecute en un Threadpool
 # y no bloquee el hilo principal mientras Pandas procesa.

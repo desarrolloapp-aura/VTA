@@ -1,5 +1,7 @@
 import os
 import json
+import string
+import random
 from fastapi import FastAPI, Request, Form, Response, Depends, HTTPException, BackgroundTasks
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -125,7 +127,9 @@ async def create_user(request: Request, background_tasks: BackgroundTasks):
     
     data = await request.json()
     email = data.get("email")
-    password = data.get("password")
+    
+    # Generar contraseña temporal de 8 caracteres
+    password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
     
     try:
         db = get_client()
@@ -133,7 +137,7 @@ async def create_user(request: Request, background_tasks: BackgroundTasks):
             "email": email, 
             "password": password, 
             "email_confirm": True,
-            "user_metadata": {"role": "viewer"}
+            "user_metadata": {"role": "viewer", "must_change_password": True}
         })
         
         # Enviar correo usando el Webhook de Google (si está configurado) en segundo plano

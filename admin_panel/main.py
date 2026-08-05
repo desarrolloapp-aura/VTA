@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from supabase import create_client, Client
+import httpx
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -127,6 +128,17 @@ async def create_user(request: Request):
             "email_confirm": True,
             "user_metadata": {"role": "viewer"}
         })
+        
+        # Enviar correo usando el Webhook de Google (si está configurado)
+        webhook_url = os.environ.get("GOOGLE_WEBHOOK_URL")
+        if webhook_url:
+            try:
+                # Disparar la petición sin bloquear la respuesta de la interfaz
+                with httpx.Client() as client:
+                    client.post(webhook_url, json={"email": email, "password": password}, timeout=5.0)
+            except Exception as hook_err:
+                print(f"Error al enviar correo por webhook: {hook_err}")
+                
         return JSONResponse(content={"success": True, "user": res.user.email})
     except Exception as e:
         return JSONResponse(status_code=400, content={"error": str(e)})
